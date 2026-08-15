@@ -104,7 +104,11 @@
 - [x] Show the preserved source image only for legacy prescriptions with an existing image reference; show the text-only panel for newly approved records without one.
 - [ ] Perform browser-based validation of the Clerk sign-in handoff, protected workspace, upload-to-review-to-save workflow, search/detail pages, and text-only record behavior; record the results.
 - [ ] Diagnose and fix the reported live Clerk sign-in action failure, including Clerk modal behavior, production browser errors, and post-sign-in routing.
-- [ ] Complete a live authenticated Clerk sign-in, verify the `/workspace` handoff and protected-route access, and record the result without editing clinical data.
+- [x] Complete a live authenticated Clerk sign-in, verify the `/workspace` handoff and protected-route access, and record the result without editing clinical data.
 - [ ] Inspect browser and production runtime logs after a live Clerk sign-in to confirm there are no Clerk, session, or protected-route errors.
-- [ ] Fix the post-sign-in Clerk session recognition path so an authenticated clinician is routed from the landing page to `/workspace` rather than returned to the public page.
+- [x] Fix the post-sign-in Clerk session recognition path so an authenticated clinician is routed from the landing page to `/workspace` rather than returned to the public page.
+- [ ] Re-test the live public-landing sign-in CTA through automatic `/workspace` redirect without editing clinical data.
+- [ ] Inspect browser console or network errors and the latest-production-only runtime logs for Clerk, session, and protected-route failures after the completed sign-in handoff.
 - [ ] Review the supplied resu reference and adapt its Hero-page animation language to ClinicOCR without copying unrelated branding or weakening reduced-motion accessibility.
+- [ ] Implement a ClinicOCR-specific, reference-inspired Hero motion system with responsive visual verification and reduced-motion coverage.
+- [ ] Record the user-deferred fresh sign-out/sign-in round-trip as a remaining optional validation step while completing all non-disruptive final checks.

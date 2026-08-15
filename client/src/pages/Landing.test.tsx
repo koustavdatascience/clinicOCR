@@ -40,10 +40,14 @@ describe("ClinicOCR landing page", () => {
     const reduced = getLandingMotionPlan(true);
     expect(active.mode).toBe("active");
     expect(active.heroScan.transition.repeat).toBe(Infinity);
+    expect(active.heroPulse.transition.repeat).toBe(Infinity);
+    expect(active.heroSignal.transition.repeat).toBe(Infinity);
     expect(active.aboutEvidence.transition.repeat).toBe(Infinity);
     expect(active.signInRings.transition.repeat).toBe(Infinity);
     expect(reduced.mode).toBe("reduced");
     expect(reduced.heroScan.animate).toEqual({});
+    expect(reduced.heroPulse.animate).toEqual({});
+    expect(reduced.heroSignal.animate).toEqual({});
     expect(reduced.aboutEvidence.animate).toEqual({});
     expect(reduced.signInRings.animate).toEqual({});
   });
@@ -53,7 +57,8 @@ describe("ClinicOCR landing page", () => {
     render(<Landing />);
     expect(screen.getByText(/About ClinicOCR/i)).toBeInTheDocument();
     expect(screen.getByText(/Secure sign in/i)).toBeInTheDocument();
-    expect(screen.getByTestId("hero-scan-line")).toBeInTheDocument();
+    expect(screen.getByTestId("hero-staged-copy")).toBeInTheDocument();
+    expect(screen.getByTestId("hero-signal-trace")).toBeInTheDocument();
     expect(screen.getByTestId("about-evidence-flow")).toBeInTheDocument();
     expect(screen.getByTestId("signin-session-rings")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /enter clinicocr/i }));
