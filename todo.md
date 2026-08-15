@@ -135,3 +135,5 @@
 - [x] Reduce the landing hero to a concise headline, one precise supporting line, and one primary action.
 - [x] Identify the exact licensed ResuMatch hero display font from the referenced source, then apply it to the ClinicOCR landing hero with an accessible fallback.
 - [ ] Fine-tune the Instrument Serif hero: lower and enlarge the headline, reduce the supporting line and primary button, and remove the title divider.
+- [ ] Add an interactive ClinicOCR “How it works” sequence with upload, doctor review, and approved text-record steps inspired by the referenced ResuMatch interaction.
+- [x] Create a concise ClinicOCR README covering purpose, live URL, stack, local setup, environment variables, and Vercel deployment.
