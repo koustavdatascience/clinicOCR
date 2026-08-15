@@ -220,8 +220,8 @@ function About({ reducedMotion }: { reducedMotion: boolean | null }) {
           <h2 className="font-display text-3xl font-bold tracking-[-0.055em] text-slate-950 sm:text-4xl">How ClinicOCR works</h2>
         </motion.div>
 
-        <div data-testid="workflow-scroll-region" data-workflow-layout="sticky-two-column" className="mx-auto mt-16 grid max-w-5xl gap-14 lg:grid-cols-2 lg:gap-0 lg:pb-[15vh]">
-          <div data-testid="about-evidence-flow" data-evidence-position="fixed" data-active-step={active.id} className="lg:sticky lg:top-[15vh] lg:flex lg:h-[60vh] lg:items-center lg:justify-end lg:self-start lg:pr-12 xl:pr-20">
+        <div data-testid="workflow-scroll-region" data-workflow-layout="sticky-two-column" className="mx-auto mt-16 flex max-w-5xl flex-col gap-14 lg:flex-row lg:gap-0 lg:pb-[15vh]">
+          <div data-testid="about-evidence-flow" data-evidence-position="fixed" data-active-step={active.id} className="lg:sticky lg:top-[15vh] lg:flex lg:h-[60vh] lg:w-1/2 lg:items-center lg:justify-end lg:self-start lg:pr-12 xl:pr-20">
             <div className="mx-auto flex w-fit items-start gap-7 lg:mx-0">
               <div className="relative flex h-[250px] w-[250px] items-center justify-center overflow-hidden rounded-[2rem] border border-teal-200 bg-white p-6 shadow-[0_18px_44px_rgba(13,92,89,0.08)] sm:h-[320px] sm:w-[320px] sm:rounded-[2.5rem] sm:p-8 lg:h-[360px] lg:w-[360px] lg:rounded-[2.75rem] lg:p-10">
                 <div className="absolute -left-12 -top-12 h-36 w-36 rounded-full bg-teal-100/80 blur-2xl" />
@@ -244,7 +244,7 @@ function About({ reducedMotion }: { reducedMotion: boolean | null }) {
             </div>
           </div>
 
-          <div data-testid="workflow-stage-list" className="flex flex-col gap-12 pl-2 sm:pl-4 lg:gap-36 lg:pb-[75vh] lg:pl-12 xl:pl-16">
+          <div data-testid="workflow-stage-list" className="flex flex-col gap-12 pl-2 sm:pl-4 lg:w-1/2 lg:gap-36 lg:pb-[75vh] lg:pl-12 xl:pl-16">
             {steps.map((step, index) => {
               const Icon = step.icon;
               const isActive = activeStep === index;
