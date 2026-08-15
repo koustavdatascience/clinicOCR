@@ -139,5 +139,5 @@
 - [x] Change the public hero badge wording from “Clinician-led” to “Language aware” without changing its visual treatment.
 - [x] Rebalance the centered landing navigation and replace its duplicate “Sign in” label with a distinct section label while keeping the right-side Sign in action.
 - [x] Make the ClinicOCR workflow steps advance automatically from upload to review to approval as the visitor scrolls, while retaining optional accessible step controls.
-- [ ] Compare the ClinicOCR scroll-driven workflow with the referenced Resu source and align any remaining relevant interaction details.
+- [x] Compare the ClinicOCR scroll-driven workflow with the referenced Resu source and align any remaining relevant interaction details.
 - [x] Create a concise ClinicOCR README covering purpose, live URL, stack, local setup, environment variables, and Vercel deployment.
