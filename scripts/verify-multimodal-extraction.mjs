@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { extractStructuredPrescription } from "../server/prescriptionPipeline.ts";
+import { extractStructuredPrescription } from "../backend/prescriptionPipeline.ts";
 
 const imagePath = process.argv[2];
 const rawOcr = process.argv[3] ?? "Raw OCR was incomplete. Use the image as the primary evidence.";

@@ -1,58 +1,50 @@
 # ClinicOCR
 
-AI-assisted prescription digitization for clinician-controlled records. Upload a handwritten prescription, review the extracted draft, and explicitly approve the final text record.
+ClinicOCR turns handwritten prescriptions into clear, clinician-reviewed digital records.
 
-**Live app:** [clinicocr-git-main-koustav5.vercel.app](https://clinicocr-git-main-koustav5.vercel.app)
+**Live app:** [clinicocr-three.vercel.app](https://clinicocr-three.vercel.app)
 
 ## What it does
 
-- Extracts structured prescription drafts with image preprocessing, Tesseract OCR, and Gemini Flash.
-- Keeps the clinician in control: **nothing is saved until explicit approval**.
-- Retains approved text records, medicines, notes, tags, and language metadata; new records do **not** store uploaded source images.
-- Supports patient history, record search, starred records, multilingual text, and PDF export.
+- Reads prescription images with OCR and AI assistance.
+- Lets the clinician review and correct every draft before saving.
+- Saves approved text records, not new source images.
+- Supports search, patient history, multiple languages, notes, and PDF export.
 
-## Stack
+## Project folders
 
-- **Frontend:** React 19, Vite, Tailwind CSS 4, tRPC, Framer Motion.
-- **Backend:** Node.js, Express, tRPC, Zod.
-- **Database:** Neon PostgreSQL with Drizzle ORM.
-- **Authentication:** Clerk.
-- **Extraction:** Sharp, Tesseract.js, Google Gemini Flash.
-- **PDF:** html2canvas and jsPDF.
+| Folder | Purpose |
+| --- | --- |
+| `frontend/` | React website and user interface. |
+| `backend/` | Express API, authentication, OCR, and record logic. |
+| `shared/` | Types and constants used by both sides. |
+| `drizzle/` | Database schema and migrations. |
+| `api/` | Small Vercel serverless entrypoint. |
+| `scripts/` | Build and safety-check scripts. |
 
-## Local setup
+## Run it locally
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Create a local `.env` file with the following values. Do not commit it.
-
-```env
-NEON_DATABASE_URL=
-GEMINI_API_KEY=
-CLERK_SECRET_KEY=
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-```
-
-Useful checks:
+Create a local `.env` file with the required database, Gemini, and Clerk keys. Do not commit it.
 
 ```bash
-pnpm check
 pnpm test
+pnpm check
 pnpm build:vercel
 ```
 
-## Vercel deployment
+## Deploy
 
-1. Import this GitHub repository into [Vercel](https://vercel.com).
-2. Add the four environment variables above in **Project Settings → Environment Variables** for Production and Preview.
-3. Add the Vercel domain to Clerk’s allowed origins and redirect configuration.
-4. Push to `main`; Vercel uses the included `vercel.json` and `pnpm build:vercel` configuration.
+Push to `main`. Vercel builds the project with the included `vercel.json` file. Keep all secrets in Vercel environment variables, never in GitHub.
 
-> Never commit populated `.env` files, database URLs, Gemini keys, or Clerk secret keys. The browser-visible Clerk publishable key should still be managed through Vercel settings.
+## Credits
 
-## Clinical-record boundary
+Made with **Manus** and open-source tools including React, Express, Clerk, Neon, Tesseract, and Gemini.
 
-ClinicOCR is designed for a **review-first, text-only** record workflow. Source images exist only during the active OCR/review session and are discarded after approval. Legacy records may still display an existing image reference.
+## License
+
+This project is available under the [MIT License](LICENSE).

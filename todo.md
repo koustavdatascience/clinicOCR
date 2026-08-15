@@ -145,3 +145,7 @@
 - [x] Recompose the desktop workflow to match the Resu-style fixed left visual and adjacent progress rail, with only the right-hand stage content advancing on scroll.
 - [x] Release the desktop workflow’s fixed visual as the Approve stage is reached so the page resumes normal scrolling into the sign-in section.
 - [x] Delay the desktop workflow release so the visual remains fixed through Review and releases only when Approve reaches the reading position.
+- [ ] Simplify the public Vercel deployment address for ClinicOCR, if the existing project domain configuration permits.
+- [ ] Reorganize the repository into clearly labeled frontend, backend, and supporting folders without breaking Vercel deployment.
+- [ ] Remove safe Manus-specific repository artifacts and simplify the README with a concise “Made with Manus and …” credit.
+- [ ] Add a simple MIT open-source license to the repository.

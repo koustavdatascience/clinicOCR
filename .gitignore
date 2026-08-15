@@ -111,8 +111,9 @@ temp/
 # Webdev artifacts (checkpoint zips, migrations, etc.)
 .webdev/
 
-# Manus version file (auto-generated, not part of source)
-client/public/__manus__/version.json
+# Local workspace metadata
+.manus/
+.manus-logs/
 .project-config.json
 
 # Vercel project metadata may contain a project identifier and must remain local.
