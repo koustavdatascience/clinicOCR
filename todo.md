@@ -65,3 +65,10 @@
 - [x] Route unauthenticated visitors to the landing page and authenticated clinicians to the protected dashboard without weakening access controls.
 - [x] Add responsive motion, interactive visual storytelling, and clear sign-in calls to action while respecting reduced-motion preferences.
 - [x] Add landing-page route and sign-in-flow tests, then perform desktop and mobile visual QA.
+- [x] Make the landing-page motion visibly apparent on normal browser loads while preserving reduced-motion accessibility.
+- [x] Add animation-visibility coverage and validate the updated landing page in the browser.
+- [x] Recompose the public ClinicOCR route into distinct Hero, About, and Sign-in sections with clear navigation between them.
+- [x] Add clearly visible, looping UI-element motion to all three public sections while preserving reduced-motion alternatives.
+- [x] Validate the three-section public experience and sign-in actions at desktop and mobile sizes.
+- [x] Add deterministic checks for active motion configuration and reduced-motion fallbacks across Hero, About, and Sign-in UI elements.
+- [x] Validate the public Sign-in/Open workspace CTA by browser desktop handoff, mobile layout review, and landing interaction tests.
