@@ -1,0 +1,32 @@
+# ClinicOCR Project TODO
+
+- [x] Define patient and prescription schema with structured medicine, findings, tags, notes, and important-record fields.
+- [x] Add database migrations for patient and prescription persistence with safe deletion behavior.
+- [x] Implement validated patient create, update, delete, duplicate-warning, and name-or-phone search procedures.
+- [x] Implement dashboard summary and recent-prescription data procedures.
+- [x] Implement secure original-prescription image storage and upload metadata flow.
+- [x] Implement server-side image preprocessing pipeline that preserves original uploads and records processing status.
+- [x] Implement OCR service boundary that preserves raw OCR responses exactly as received.
+- [x] Implement validated AI structured-extraction boundary with the required no-hallucination and Possibly-label rules.
+- [x] Implement doctor-controlled review and explicit-save workflow that never auto-saves an analysis draft.
+- [x] Build the persistent ClinicOCR application shell with medical navigation, responsive layout, and accessible visual hierarchy.
+- [x] Build the dashboard with live metrics, recent uploads, quick upload, add patient actions, and skeleton loaders.
+- [x] Build patient directory, patient form, duplicate detection feedback, edit, deletion confirmation, and patient detail history.
+- [x] Build the prescription upload experience with type validation, image preview, selected-patient context, and processing progress.
+- [x] Build the prescription review workspace with original image, unaltered raw OCR, editable structured output, and explicit save action.
+- [x] Build prescription detail and chronological patient-history views with reviewed content and source-image access.
+- [x] Build Phase 2 search filters for patient name, phone number, medicine name, and prescription date.
+- [x] Build Phase 2 doctor notes, important/starred records, generated tag badges, and uncertainty indicators.
+- [x] Build Phase 2 PDF report export for saved prescriptions.
+- [x] Add server and UI tests covering validation, safety invariants, data procedures, and primary user flows.
+- [x] Verify desktop and tablet renderings, error states, loading states, and responsive interaction quality.
+- [x] Add integration tests for clinic router procedures: patient CRUD, duplicate detection, dashboard statistics, prescription save, metadata updates, and search filters.
+- [ ] Add end-to-end UI coverage for upload, review, explicit save, patient history, important records, notes, and PDF export.
+- [ ] Perform authenticated desktop and tablet visual QA for the dashboard, patients, upload, review, detail, and search workflows.
+- [x] Add successful patient create, update, deletion, and directory search assertions to the clinic router integration suite.
+- [x] Configure the supplied Neon PostgreSQL URL and Gemini API key through secure project environment variables.
+- [x] Migrate the persistence layer from the template database dialect to Neon PostgreSQL and validate the live schema.
+- [x] Replace the built-in model call with the supplied Gemini integration for structured prescription extraction.
+- [x] Migrate the canonical Drizzle schema and migration configuration from MySQL to PostgreSQL/Neon.
+- [x] Move authentication user persistence to Neon so ClinicOCR no longer relies on the template MySQL database.
+- [x] Replace the one-off Neon setup script with an automated, versioned schema workflow and live schema validation.

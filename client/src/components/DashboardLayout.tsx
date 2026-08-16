@@ -21,15 +21,19 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+import { ClipboardPlus, FileSearch, LayoutDashboard, LogOut, PanelLeft, ScanLine, Search, Users } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
+import { ClinicMark } from "./clinic/ClinicMark";
+
 const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
+  { icon: LayoutDashboard, label: "Overview", path: "/" },
+  { icon: Users, label: "Patients", path: "/patients" },
+  { icon: ScanLine, label: "Digitize", path: "/upload" },
+  { icon: Search, label: "Find records", path: "/search" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -60,18 +64,15 @@ export default function DashboardLayout({
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
-          <div className="flex flex-col items-center gap-6">
-            <h1 className="text-2xl font-semibold tracking-tight text-center">
-              Sign in to continue
-            </h1>
-            <p className="text-sm text-muted-foreground text-center max-w-sm">
-              Access to this dashboard requires authentication. Continue to launch the login flow.
-            </p>
+          <ClinicMark />
+          <div className="flex flex-col items-center gap-3">
+            <h1 className="font-display text-2xl font-bold tracking-[-0.05em] text-center text-slate-900">Your private clinical workspace</h1>
+            <p className="text-center text-sm leading-6 text-slate-500">Sign in to access patient records and reviewed prescription drafts.</p>
           </div>
           <Button
             onClick={() => startLogin()}
             size="lg"
-            className="w-full shadow-lg hover:shadow-xl transition-all"
+            className="w-full bg-teal-700 shadow-lg shadow-teal-900/15 hover:bg-teal-800"
           >
             Sign in
           </Button>
@@ -154,10 +155,10 @@ function DashboardLayoutContent({
       <div className="relative" ref={sidebarRef}>
         <Sidebar
           collapsible="icon"
-          className="border-r-0"
+          className="border-r-0 bg-[#f8fbfb]"
           disableTransition={isResizing}
         >
-          <SidebarHeader className="h-16 justify-center">
+          <SidebarHeader className="h-[86px] justify-center border-b border-teal-900/8">
             <div className="flex items-center gap-3 px-2 transition-all w-full">
               <button
                 onClick={toggleSidebar}
@@ -166,17 +167,12 @@ function DashboardLayoutContent({
               >
                 <PanelLeft className="h-4 w-4 text-muted-foreground" />
               </button>
-              {!isCollapsed ? (
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="font-semibold tracking-tight truncate">
-                    Navigation
-                  </span>
-                </div>
-              ) : null}
+              <div className="min-w-0 group-data-[collapsible=icon]:hidden"><ClinicMark /></div>
             </div>
           </SidebarHeader>
 
           <SidebarContent className="gap-0">
+            <div className="px-4 pb-2 pt-7 group-data-[collapsible=icon]:hidden"><p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-slate-400">Workspace</p></div>
             <SidebarMenu className="px-2 py-1">
               {menuItems.map(item => {
                 const isActive = location === item.path;
@@ -186,7 +182,7 @@ function DashboardLayoutContent({
                       isActive={isActive}
                       onClick={() => setLocation(item.path)}
                       tooltip={item.label}
-                      className={`h-10 transition-all font-normal`}
+                      className={`h-11 rounded-xl px-3 transition-all font-medium ${isActive ? "bg-teal-50 text-teal-800 hover:bg-teal-50" : "text-slate-500 hover:bg-white hover:text-slate-900"}`}
                     >
                       <item.icon
                         className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
@@ -200,6 +196,7 @@ function DashboardLayoutContent({
           </SidebarContent>
 
           <SidebarFooter className="p-3">
+            {!isCollapsed && <div className="mb-3 rounded-2xl bg-[linear-gradient(145deg,#edf9f7,#f5fbfa)] p-3.5"><div className="flex items-center gap-2 text-teal-800"><FileSearch className="h-4 w-4" /><span className="text-xs font-bold">Review-first records</span></div><p className="mt-1.5 text-[0.68rem] leading-4 text-slate-500">Every prescription needs doctor approval before it is saved.</p></div>}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-3 rounded-lg px-1 py-1 hover:bg-accent/50 transition-colors w-full text-left group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -255,7 +252,7 @@ function DashboardLayoutContent({
             </div>
           </div>
         )}
-        <main className="flex-1 p-4">{children}</main>
+        <main className="min-h-screen flex-1 bg-[radial-gradient(circle_at_top_right,rgba(214,244,239,0.6),transparent_31%),#f7faf9] p-4 sm:p-7 lg:p-10">{children}</main>
       </SidebarInset>
     </>
   );
