@@ -112,6 +112,8 @@ The rendered DOM confirmed the lower scroll position advanced the visual panel t
 
 The Resu source comparison confirmed that its workflow chooses the active step when its top reaches roughly 45% of the viewport, keeps the left visual sticky, expands the active progress indicator, and reduces opacity/scale on inactive steps. ClinicOCR already used the same 46% reading-line approach; it now also provides a teal active vertical progress rail beside the sticky clinical visual and 95% scale treatment for inactive workflow stages. Live review of `https://clinicocr-rc7far6hf-koustav5.vercel.app` confirmed the upload state, active expanded rail, compact inactive dots, and muted later steps in the expected layout.
 
+The stable `clinicocr-git-main-koustav5.vercel.app` alias also resolved successfully after the refinement, showing the public landing with its Language aware badge, centered navigation, and clinical workflow content.
+
 ## Exact ResuMatch hero display font
 
 The referenced ResuMatch source declares `Instrument Serif` as a local hero font in `frontend/src/lib/fonts.ts`. Its upstream project licenses the family under the SIL Open Font License 1.1. ClinicOCR now loads the exact **Instrument Serif** family from Google Fonts and uses it only through the `.font-editorial` hero class, with Georgia as an accessible fallback; the clinical workspace continues to use its existing readable sans-serif type. Production deployment `dpl_BFiAsWdZmjrH86o49MB5byNrsisa` (`https://clinicocr-eb3sknllz-koustav5.vercel.app`) is READY. A live browser capture confirms the condensed high-contrast Instrument Serif headline is rendered for **“Prescriptions, made clear.”**
