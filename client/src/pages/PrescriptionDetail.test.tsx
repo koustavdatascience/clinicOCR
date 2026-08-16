@@ -147,6 +147,7 @@ describe("PrescriptionDetail", () => {
     await waitFor(() => expect(pdfSave).toHaveBeenCalledWith(expect.stringMatching(/^ClinicOCR-Taylor-Morgan-/)));
     expect(pdfOperations.text).toHaveBeenCalledWith("ClinicOCR", expect.any(Number), expect.any(Number));
     expect(pdfOperations.text).toHaveBeenCalledWith("CORRECTED TEXT", expect.any(Number), expect.any(Number));
+    expect(pdfOperations.text).toHaveBeenCalledWith("SUMMARY", expect.any(Number), expect.any(Number));
     expect(pdfOperations.text).toHaveBeenCalledWith("MEDICINES", expect.any(Number), expect.any(Number));
     expect(pdfOperations.rect).toHaveBeenCalled();
     record.prescription.correctedText = originalText;

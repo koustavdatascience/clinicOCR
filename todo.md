@@ -128,3 +128,4 @@
 - [ ] Inspect browser console and network activity immediately after a completed Clerk sign-in on the live deployment; record any Clerk, session, or protected-route errors or confirm none.
 - [x] Query Vercel runtime logs or errors scoped specifically to deployment `dpl_39rzf84WoHfkP7DG9My6cMS9XH7N` after sign-in and document whether any Clerk, session, or protected-route failures occurred.
 - [x] Restore the polished clinical PDF report layout while retaining the resilient export fallback and validate it against the clinician-provided reference PDF.
+- [ ] Simplify the PDF report’s reviewed-summary section heading to “Summary” only and validate the resilient export path.

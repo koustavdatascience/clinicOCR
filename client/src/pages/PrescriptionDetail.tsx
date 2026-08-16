@@ -161,7 +161,7 @@ function saveTextPdfFallback(record: ExportableRecord) {
   y += 86;
 
   drawSection("Corrected text", prescription.correctedText);
-  drawSection("AI summary · reviewed by doctor", prescription.aiSummary, true);
+  drawSection("Summary", prescription.aiSummary, true);
   const medicineText = (prescription.medicines ?? []).map(medicine => {
     const name = /^possibly\b/i.test(medicine.name) ? `VERIFY: ${medicine.name}` : medicine.name;
     return [name, medicine.dosage, medicine.frequency].filter(Boolean).join("  —  ");
@@ -205,7 +205,7 @@ async function exportPdf(record: ExportableRecord) {
   appendPdfSection(report, "Prescription date", formatDate(prescription.createdAt), "ltr");
   appendPdfSection(report, "Source language", `${prescription.sourceLanguageName || "Undetermined"}${prescription.sourceScript ? ` · ${prescription.sourceScript} script` : ""}`, "ltr");
   appendPdfSection(report, "Corrected text", prescription.correctedText, direction);
-  appendPdfSection(report, "AI summary", prescription.aiSummary, direction);
+  appendPdfSection(report, "Summary", prescription.aiSummary, direction);
   appendPdfSection(report, "Medicines", (prescription.medicines ?? []).map(medicine => [medicine.name, medicine.dosage, medicine.frequency].filter(Boolean).join(" — ")).join("\n"), direction);
   appendPdfSection(report, "Doctor notes", prescription.doctorNotes || "Not recorded", direction);
   document.body.append(report);
