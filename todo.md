@@ -72,3 +72,16 @@
 - [x] Validate the three-section public experience and sign-in actions at desktop and mobile sizes.
 - [x] Add deterministic checks for active motion configuration and reduced-motion fallbacks across Hero, About, and Sign-in UI elements.
 - [x] Validate the public Sign-in/Open workspace CTA by browser desktop handoff, mobile layout review, and landing interaction tests.
+- [x] Assess the current ClinicOCR server, storage, OAuth, OCR, and Gemini dependencies for Vercel compatibility.
+- [x] Add Vercel deployment configuration that builds the React client and serves the existing Express/tRPC application as a serverless function.
+- [x] Document Vercel environment variables, OAuth callback URL changes, storage caveats, and production deployment steps.
+- [x] Validate the Vercel production build and deployment configuration without publishing externally.
+- [x] Ensure all credential-bearing local files are ignored and no deployable source file contains live ClinicOCR secrets.
+- [x] Add a safe Vercel environment-variable template and document how to provide each secret through Vercel rather than GitHub.
+- [x] Document the required credential rotation process if a key was ever committed or exposed.
+- [ ] Identify the intended Vercel project and confirm available encrypted environment-variable management capabilities.
+- [ ] Prepare the ClinicOCR production and preview environment-variable configuration without adding any secret values to GitHub.
+- [ ] Verify that no deployment was published and summarize any Vercel dashboard action that still requires the user’s direct input.
+- [ ] Create a new private GitHub repository named clinicOCR for the ClinicOCR source code.
+- [ ] Push the validated ClinicOCR project to the new repository after running the secret scan.
+- [ ] Confirm the new repository contains no credential-bearing tracked files before using it for Vercel linkage.
