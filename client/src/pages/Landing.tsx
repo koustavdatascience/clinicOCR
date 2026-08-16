@@ -5,7 +5,6 @@ import {
   ArrowRight,
   CheckCircle2,
   FileScan,
-  Languages,
   LockKeyhole,
   ScanLine,
   ShieldCheck,
@@ -189,34 +188,50 @@ function EvidenceFlow({ reducedMotion }: { reducedMotion: boolean | null }) {
 function About({ reducedMotion }: { reducedMotion: boolean | null }) {
   const plan = getLandingMotionPlan(reducedMotion);
   const still = reducedMotion === true;
-  const highlights = [
-    { icon: FileScan, label: "Review source", value: "Temporary by design" },
-    { icon: Languages, label: "Language", value: "Native script retained" },
-    { icon: ShieldCheck, label: "Approval", value: "Doctor decides" },
+  const [activeStep, setActiveStep] = useState(0);
+  const steps = [
+    { id: "01", title: "Upload the prescription", description: "Choose the patient and add the source image.", visualLabel: "Temporary source", visualText: "Rx" as const, icon: FileScan },
+    { id: "02", title: "Review the draft", description: "Correct the structured text and medicines.", visualLabel: "Doctor review", visualText: "Review" as const, icon: ScanLine },
+    { id: "03", title: "Approve the record", description: "Save only the clinician-approved text.", visualLabel: "Text-only record", visualText: "Approved" as const, icon: ShieldCheck },
   ];
+  const active = steps[activeStep];
+  const ActiveIcon = active.icon;
   return (
-    <section id="about" className="relative overflow-hidden bg-[#f2fbf8] px-5 py-24 text-slate-900 lg:px-8 lg:py-32">
-      <div className="relative mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.84fr_1.16fr] lg:items-center">
-        <motion.div initial={{ opacity: 0, x: still ? 0 : -24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: still ? 0 : 0.56 }}>
-          <Label index="02">About ClinicOCR</Label>
-          <h2 className="mt-5 font-display text-5xl font-bold leading-[0.95] tracking-[-0.07em] text-slate-950">A safer path from ink to insight.</h2>
-          <p className="mt-6 max-w-lg text-base leading-7 text-slate-600">ClinicOCR turns a scan into an organized, searchable draft. The upload exists only for OCR and doctor review; the approved clinical record contains reviewed text, not the image.</p>
-          <div className="mt-8 grid gap-3">
-            {highlights.map(item => (
-              <div key={item.label} className="flex items-center gap-3 rounded-2xl border border-teal-900/8 bg-white/80 px-4 py-3 shadow-[0_10px_24px_rgba(8,79,80,0.04)]">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-700"><item.icon className="h-4 w-4" /></div>
-                <div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-teal-700">{item.label}</p><p className="mt-0.5 text-sm font-semibold text-slate-800">{item.value}</p></div>
-              </div>
-            ))}
-          </div>
+    <section id="about" className="relative overflow-hidden bg-[#f7fbf9] px-5 py-24 text-slate-900 lg:px-8 lg:py-32">
+      <div className="mx-auto max-w-6xl">
+        <motion.div initial={{ opacity: 0, y: still ? 0 : 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: still ? 0 : 0.56, ease: entranceEase }} className="flex items-center justify-center gap-3 text-center">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-100 text-teal-700"><Sparkles className="h-4 w-4" /></span>
+          <h2 className="font-display text-3xl font-bold tracking-[-0.055em] text-slate-950 sm:text-4xl">How ClinicOCR works</h2>
         </motion.div>
 
-        <motion.div data-testid="about-evidence-flow" animate={plan.aboutEvidence.animate} transition={plan.aboutEvidence.transition} className="rounded-[2rem] border border-teal-900/10 bg-white p-5 shadow-[0_26px_55px_rgba(8,79,80,0.14)]">
-          <div className="flex items-center justify-between"><div><p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-teal-700">Review flow</p><p className="mt-1 font-display text-2xl font-bold tracking-[-0.05em]">One visible handoff</p></div><ScanLine className="h-6 w-6 text-teal-700" /></div>
-          <div className="mt-6 grid grid-cols-3 gap-2"><div className="rounded-2xl border border-amber-100 bg-[#fff9ee] p-3"><span className="text-[0.6rem] font-bold uppercase tracking-wide text-amber-700">Upload</span><p className="mt-3 font-serif text-lg text-slate-700">Rx<br />দিনে ২ বার</p></div><div className="flex items-center justify-center"><ArrowRight className="h-5 w-5 text-teal-700" /></div><div className="rounded-2xl bg-slate-950 p-3 text-white"><span className="text-[0.6rem] font-bold uppercase tracking-wide text-teal-300">Approved</span><p className="mt-3 text-sm font-bold leading-5">Text-only<br />record</p></div></div>
-          <div className="mt-5 overflow-hidden rounded-full bg-teal-50 p-1"><div className="h-2 w-full rounded-full bg-[linear-gradient(90deg,#0d766f,#82e4d4)]" /></div>
-          <div className="mt-4 flex items-center justify-between text-[0.68rem] font-bold uppercase tracking-[0.11em] text-slate-400"><span>Review image</span><span>Doctor review</span><span>Text record</span></div>
-        </motion.div>
+        <div className="mt-16 grid gap-12 lg:grid-cols-[0.93fr_1.07fr] lg:gap-20">
+          <motion.div data-testid="about-evidence-flow" animate={plan.aboutEvidence.animate} transition={plan.aboutEvidence.transition} className="lg:sticky lg:top-28 lg:self-start">
+            <div className="relative mx-auto flex aspect-square w-full max-w-[390px] items-center justify-center overflow-hidden rounded-[2.4rem] border border-teal-200 bg-white p-8 shadow-[0_24px_55px_rgba(13,92,89,0.1)]">
+              <div className="absolute -left-12 -top-12 h-36 w-36 rounded-full bg-teal-100/80 blur-2xl" />
+              <AnimatePresence mode="wait">
+                <motion.div key={active.id} initial={{ opacity: 0, scale: still ? 1 : 0.94, y: still ? 0 : 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.98, y: still ? 0 : -8 }} transition={{ duration: still ? 0 : 0.38, ease: entranceEase }} className="relative flex w-full flex-col items-center text-center">
+                  <div className={`flex h-24 w-24 items-center justify-center rounded-[1.8rem] ${activeStep === 0 ? "bg-amber-50 text-amber-700" : activeStep === 1 ? "bg-teal-50 text-teal-700" : "bg-slate-950 text-teal-300"}`}><ActiveIcon className="h-10 w-10" /></div>
+                  <p className="mt-7 text-[0.66rem] font-bold uppercase tracking-[0.16em] text-teal-700">{active.visualLabel}</p>
+                  <p className={`mt-2 font-editorial text-5xl leading-none ${activeStep === 2 ? "text-slate-950" : "text-slate-800"}`}>{active.visualText}</p>
+                  {activeStep === 0 && <p className="mt-5 rounded-xl bg-[#fff9ee] px-4 py-2 font-editorial text-xl text-slate-700">দিনে ২ বার</p>}
+                  {activeStep === 1 && <div className="mt-5 w-full rounded-2xl border border-teal-100 bg-teal-50/70 p-3 text-left text-xs font-semibold leading-5 text-teal-900">Structured text · medicines · notes</div>}
+                  {activeStep === 2 && <div className="mt-5 flex items-center gap-2 rounded-full bg-teal-50 px-4 py-2 text-xs font-bold text-teal-800"><CheckCircle2 className="h-4 w-4" />Ready to save</div>}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </motion.div>
+
+          <div className="relative space-y-8 lg:space-y-16 lg:pt-5">
+            <div aria-hidden className="absolute bottom-8 left-5 top-10 hidden w-px bg-teal-100 lg:block" />
+            {steps.map((step, index) => {
+              const Icon = step.icon;
+              const isActive = activeStep === index;
+              return <button key={step.id} type="button" onClick={() => setActiveStep(index)} onMouseEnter={() => setActiveStep(index)} onFocus={() => setActiveStep(index)} className={`relative z-10 block w-full rounded-[1.7rem] p-4 text-left transition-all duration-300 sm:p-6 ${isActive ? "bg-white shadow-[0_16px_42px_rgba(13,92,89,0.08)]" : "opacity-35 hover:opacity-70 focus:opacity-100"}`}>
+                <div className="flex items-start gap-5"><span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-all duration-300 ${isActive ? "bg-teal-100 text-teal-900 shadow-sm" : "border border-slate-200 bg-white text-slate-400"}`}>{step.id}</span><div className="pt-1"><div className="flex items-center gap-2"><Icon className={`h-4 w-4 ${isActive ? "text-teal-700" : "text-slate-400"}`} /><h3 className={`text-2xl font-bold tracking-[-0.045em] sm:text-3xl ${isActive ? "text-slate-950" : "text-slate-500"}`}>{step.title}</h3></div><p className={`mt-3 max-w-sm text-sm leading-6 sm:text-base ${isActive ? "text-slate-600" : "text-slate-400"}`}>{step.description}</p></div></div>
+              </button>;
+            })}
+          </div>
+        </div>
       </div>
     </section>
   );
