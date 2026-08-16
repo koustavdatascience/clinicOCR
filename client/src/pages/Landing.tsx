@@ -316,7 +316,7 @@ export default function Landing() {
   };
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f8fbfa] text-slate-950 selection:bg-teal-200 selection:text-teal-950">
+    <main data-testid="landing-root" className="min-h-screen overflow-x-hidden bg-[#f8fbfa] text-slate-950 selection:bg-teal-200 selection:text-teal-950">
       <section id="hero" className="relative isolate min-h-screen overflow-hidden">
         <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_14%_20%,rgba(126,236,197,0.25),transparent_25%),radial-gradient(circle_at_84%_38%,rgba(72,197,166,0.14),transparent_20%),linear-gradient(180deg,#fcfdfc_0%,#f4fbf8_72%,#eef8f5_100%)]" />
         <nav data-testid="landing-navigation" data-navigation-state={navigationState} className={`fixed left-1/2 z-30 flex w-[calc(100%-2.5rem)] -translate-x-1/2 items-center transition-[top,max-width,padding,background-color,border-color,box-shadow,backdrop-filter] duration-300 ${compactNavigation ? "top-3 max-w-5xl rounded-2xl border border-teal-900/10 bg-white/82 px-4 py-3 shadow-[0_16px_42px_rgba(13,92,89,0.12)] backdrop-blur-xl md:w-[calc(100%-4rem)]" : "top-0 max-w-7xl px-0 py-6 md:w-[calc(100%-4rem)]"}`}>

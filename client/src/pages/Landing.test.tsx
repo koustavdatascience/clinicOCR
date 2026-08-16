@@ -71,6 +71,7 @@ describe("ClinicOCR landing page", () => {
     expect(screen.getByTestId("hero-staged-copy")).toBeInTheDocument();
     expect(screen.getByTestId("hero-signal-trace")).toBeInTheDocument();
     const workflowCard = screen.getByTestId("about-evidence-flow");
+    expect(screen.getByTestId("landing-root")).toHaveClass("overflow-x-hidden");
     expect(workflowCard).toHaveAttribute("data-evidence-position", "fixed");
     expect(workflowCard).toHaveClass("lg:sticky", "lg:top-[15vh]", "lg:h-[60vh]", "lg:w-1/2");
     expect(screen.getByTestId("workflow-scroll-region")).toHaveAttribute("data-workflow-layout", "sticky-two-column");
