@@ -100,7 +100,7 @@
 - [x] Preserve existing saved records as legacy text records without re-uploading or migrating their original images.
 - [x] Replace Manus OAuth and session handling with Clerk authentication while preserving the existing Neon clinician identity linkage.
 - [x] Add Clerk configuration to Vercel without committing its publishable or secret keys to GitHub.
-- [ ] Run a comprehensive post-migration system check covering TypeScript, unit and integration tests, Neon schema and persistence, Clerk client/server wiring, text-only record safeguards, main browser flows, production build, credential scanning, and deployment configuration.
+- [x] Run a comprehensive post-migration system check covering TypeScript, unit and integration tests, Neon schema and persistence, Clerk client/server wiring, text-only record safeguards, main browser flows, production build, credential scanning, and deployment configuration.
 - [x] Show the preserved source image only for legacy prescriptions with an existing image reference; show the text-only panel for newly approved records without one.
 - [ ] Perform browser-based validation of the Clerk sign-in handoff, protected workspace, upload-to-review-to-save workflow, search/detail pages, and text-only record behavior; record the results.
 - [ ] Diagnose and fix the reported live Clerk sign-in action failure, including Clerk modal behavior, production browser errors, and post-sign-in routing.
@@ -109,6 +109,8 @@
 - [x] Fix the post-sign-in Clerk session recognition path so an authenticated clinician is routed from the landing page to `/workspace` rather than returned to the public page.
 - [ ] Re-test the live public-landing sign-in CTA through automatic `/workspace` redirect without editing clinical data.
 - [ ] Inspect browser console or network errors and the latest-production-only runtime logs for Clerk, session, and protected-route failures after the completed sign-in handoff.
-- [ ] Review the supplied resu reference and adapt its Hero-page animation language to ClinicOCR without copying unrelated branding or weakening reduced-motion accessibility.
-- [ ] Implement a ClinicOCR-specific, reference-inspired Hero motion system with responsive visual verification and reduced-motion coverage.
+- [x] Review the supplied resu reference and adapt its Hero-page animation language to ClinicOCR without copying unrelated branding or weakening reduced-motion accessibility.
+- [x] Implement a ClinicOCR-specific, reference-inspired Hero motion system with responsive visual verification and reduced-motion coverage.
+- [x] Validate the updated Hero on the development preview at mobile and tablet breakpoints, confirming staged content, evidence-flow layout, and CTA readability.
+- [ ] Validate the current Vercel deployment’s Hero at mobile and tablet breakpoints, confirming staged headline visibility, evidence-flow layout, CTA readability, and no animation or auth-related client errors.
 - [ ] Record the user-deferred fresh sign-out/sign-in round-trip as a remaining optional validation step while completing all non-disruptive final checks.

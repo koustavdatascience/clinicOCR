@@ -54,10 +54,12 @@ const trpcClient = trpc.createClient({
 });
 
 const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const isDevelopmentLandingPreview = import.meta.env.DEV && new URLSearchParams(window.location.search).has("preview");
 
 function Root() {
   const application = <trpc.Provider client={trpcClient} queryClient={queryClient}><QueryClientProvider client={queryClient}><App /></QueryClientProvider></trpc.Provider>;
   if (!publishableKey) {
+    if (isDevelopmentLandingPreview) return application;
     return <div className="flex min-h-screen items-center justify-center bg-slate-950 p-6 text-center text-sm leading-6 text-slate-300">ClinicOCR authentication is not configured for this environment.</div>;
   }
   return <ClerkProvider publishableKey={publishableKey}><ClerkTokenBridge>{application}</ClerkTokenBridge></ClerkProvider>;

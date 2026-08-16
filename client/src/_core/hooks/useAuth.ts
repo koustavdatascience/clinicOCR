@@ -8,6 +8,18 @@ type UseAuthOptions = {
 };
 
 export function useAuth(options?: UseAuthOptions) {
+  const isDevelopmentLandingPreview = import.meta.env.DEV && typeof window !== "undefined" && new URLSearchParams(window.location.search).has("preview");
+  if (isDevelopmentLandingPreview) {
+    return {
+      user: null,
+      loading: false,
+      error: null,
+      isAuthenticated: false,
+      refresh: async () => undefined,
+      login: () => undefined,
+      logout: async () => undefined,
+    };
+  }
   const { redirectOnUnauthenticated = false, redirectPath } = options ?? {};
   const { isLoaded: isClerkLoaded, isSignedIn } = useUser();
   const { isLoaded: isAuthLoaded } = useClerkAuth();
