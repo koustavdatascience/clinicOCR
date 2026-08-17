@@ -114,3 +114,6 @@
 - [x] Validate the updated Hero on the development preview at mobile and tablet breakpoints, confirming staged content, evidence-flow layout, and CTA readability.
 - [ ] Validate the current Vercel deployment’s Hero at mobile and tablet breakpoints, confirming staged headline visibility, evidence-flow layout, CTA readability, and no animation or auth-related client errors.
 - [ ] Record the user-deferred fresh sign-out/sign-in round-trip as a remaining optional validation step while completing all non-disruptive final checks.
+- [ ] Diagnose the production `clinic.prescriptions.analyze` 504 response, including serverless execution duration, OCR and Gemini timeout behavior, and the client’s non-JSON error path.
+- [ ] Repair production prescription analysis so timeout failures return a structured actionable response and do not display a malformed JSON parsing error.
+- [ ] Revalidate the deployed upload-to-analysis-to-review workflow with a clinician-provided prescription image without saving or altering clinical records unless the doctor explicitly approves it.

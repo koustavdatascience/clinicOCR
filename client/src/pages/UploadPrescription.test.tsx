@@ -20,6 +20,7 @@ vi.mock("@/lib/trpc", () => ({
 vi.mock("wouter", () => ({ useLocation: () => ["/upload", vi.fn()] }));
 
 import UploadPrescription from "./UploadPrescription";
+import { formatAnalysisError } from "@/lib/gatewayResponse";
 
 beforeEach(() => {
   analyzeMutate.mockReset();
@@ -28,6 +29,10 @@ beforeEach(() => {
 afterEach(() => cleanup());
 
 describe("UploadPrescription", () => {
+  it("turns a gateway timeout parsing failure into an actionable recovery message", () => {
+    expect(formatAnalysisError('Unexpected token \'A\', "An error o"... is not valid JSON')).toMatch(/Analysis took longer/i);
+  });
+
   it("requires both a selected patient and a valid image before analysis can start", async () => {
     const user = userEvent.setup();
     render(<UploadPrescription />);

@@ -1,6 +1,7 @@
 import { ClerkProvider, useAuth as useClerkAuth } from "@clerk/react";
 import { trpc } from "@/lib/trpc";
 import { getClerkToken, setClerkTokenResolver } from "@/lib/clerkToken";
+import { fetchClinicRpc } from "@/lib/gatewayResponse";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { useEffect, useState, type ReactNode } from "react";
@@ -47,7 +48,7 @@ const trpcClient = trpc.createClient({
         return token ? { Authorization: `Bearer ${token}` } : {};
       },
       fetch(input, init) {
-        return globalThis.fetch(input, { ...(init ?? {}), credentials: "include" });
+        return fetchClinicRpc(input, { ...(init ?? {}), credentials: "include" });
       },
     }),
   ],

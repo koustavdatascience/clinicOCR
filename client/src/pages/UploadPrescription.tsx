@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
 import { saveDraft } from "@/lib/clinic";
+import { formatAnalysisError } from "@/lib/gatewayResponse";
 import { Check, FileImage, ImagePlus, LoaderCircle, Search, ShieldCheck, Sparkles, UserRound } from "lucide-react";
 import { type ChangeEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -36,7 +37,7 @@ export default function UploadPrescription() {
       toast.success("Analysis draft ready for doctor review.");
       setLocation("/review");
     },
-    onError: error => toast.error(error.message),
+    onError: error => toast.error(formatAnalysisError(error.message)),
   });
 
   useEffect(() => {

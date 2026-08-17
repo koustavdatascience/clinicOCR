@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  ANALYSIS_BUDGET_MS,
+  GEMINI_BUDGET_MS,
+  GEMINI_REQUEST_BUDGET_MS,
+  OCR_BUDGET_MS,
   decodePrescriptionUpload,
   extractStructuredPrescription,
   normalizeUncertainMedicineName,
@@ -24,6 +28,12 @@ describe("prescription upload validation", () => {
 });
 
 describe("prescription extraction safeguards", () => {
+  it("keeps OCR and multimodal fallback work inside the Vercel serverless runtime window", () => {
+    expect(ANALYSIS_BUDGET_MS).toBeLessThan(60_000);
+    expect(OCR_BUDGET_MS + GEMINI_BUDGET_MS).toBeLessThanOrEqual(ANALYSIS_BUDGET_MS);
+    expect(GEMINI_REQUEST_BUDGET_MS).toBeLessThanOrEqual(GEMINI_BUDGET_MS);
+  });
+
   it("normalizes uncertain medicine labels to the exact Possibly prefix", () => {
     expect(normalizeUncertainMedicineName("possibly amoxicillin")).toBe("Possibly amoxicillin");
     expect(normalizeUncertainMedicineName("Amoxicillin")).toBe("Amoxicillin");

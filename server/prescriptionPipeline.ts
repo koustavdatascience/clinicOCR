@@ -7,6 +7,10 @@ import { ENV } from "./_core/env";
 const ACCEPTED_MIME_TYPES = new Set(["image/jpeg", "image/png"]);
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 const GEMINI_MODELS = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-flash-lite-latest"] as const;
+export const ANALYSIS_BUDGET_MS = 52_000;
+export const OCR_BUDGET_MS = 12_000;
+export const GEMINI_BUDGET_MS = 37_000;
+export const GEMINI_REQUEST_BUDGET_MS = 20_000;
 
 export type DecodedUpload = { buffer: Buffer; mimeType: "image/jpeg" | "image/png" };
 
@@ -111,13 +115,31 @@ export async function preprocessPrescriptionImage(source: Buffer): Promise<Buffe
   return sharp(thresholded, { raw: { width: normalized.info.width, height: normalized.info.height, channels: normalized.info.channels } }).sharpen().png().toBuffer();
 }
 
-export async function extractRawOcr(processedImage: Buffer): Promise<{ text: string; confidence: number | null }> {
-  const worker = await createWorker("eng");
+export async function extractRawOcr(processedImage: Buffer, timeoutMs = OCR_BUDGET_MS): Promise<{ text: string; confidence: number | null }> {
+  const startedAt = Date.now();
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const workerPromise = createWorker("eng");
+  let worker: Awaited<ReturnType<typeof createWorker>> | undefined;
   try {
-    const result = await worker.recognize(processedImage);
+    worker = await Promise.race([
+      workerPromise,
+      new Promise<never>((_, reject) => {
+        timeout = setTimeout(() => reject(new Error("OCR did not start within the secure review window.")), timeoutMs);
+      }),
+    ]);
+    if (timeout) clearTimeout(timeout);
+    const remainingRecognitionBudgetMs = Math.max(500, timeoutMs - (Date.now() - startedAt));
+    const result = await Promise.race([
+      worker.recognize(processedImage),
+      new Promise<never>((_, reject) => {
+        timeout = setTimeout(() => reject(new Error("OCR did not finish within the secure review window.")), remainingRecognitionBudgetMs);
+      }),
+    ]);
     return { text: result.data.text, confidence: Number.isFinite(result.data.confidence) ? Math.round(result.data.confidence) : null };
   } finally {
-    await worker.terminate();
+    if (timeout) clearTimeout(timeout);
+    if (worker) await worker.terminate().catch(() => undefined);
+    else void workerPromise.then(createdWorker => createdWorker.terminate()).catch(() => undefined);
   }
 }
 
@@ -125,6 +147,7 @@ export async function extractStructuredPrescription(
   rawOcr: string,
   originalImage?: Buffer,
   originalMimeType: "image/jpeg" | "image/png" = "image/jpeg",
+  deadlineAt = Date.now() + GEMINI_BUDGET_MS,
 ): Promise<StructuredPrescriptionDraft> {
   if (!ENV.geminiApiKey) throw new Error("The Gemini API key is not configured.");
   const evidence = [
@@ -133,13 +156,18 @@ export async function extractStructuredPrescription(
   ];
   let lastError = "Gemini extraction was unavailable.";
   for (const model of GEMINI_MODELS) {
+    const remainingBudgetMs = deadlineAt - Date.now();
+    if (remainingBudgetMs < 1_250) {
+      lastError = "Gemini extraction did not finish within the secure review window.";
+      break;
+    }
     try {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(ENV.geminiApiKey)}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          signal: AbortSignal.timeout(30_000),
+          signal: AbortSignal.timeout(Math.min(GEMINI_REQUEST_BUDGET_MS, remainingBudgetMs)),
           body: JSON.stringify({
             systemInstruction: { parts: [{ text: EXTRACTION_INSTRUCTIONS }] },
             contents: [{ role: "user", parts: evidence }],
@@ -166,12 +194,24 @@ export async function analyzePrescriptionImage(
   source: Buffer,
   sourceMimeType: "image/jpeg" | "image/png" = "image/jpeg",
 ): Promise<PrescriptionAnalysis> {
+  const deadlineAt = Date.now() + ANALYSIS_BUDGET_MS;
   const processedImage = await preprocessPrescriptionImage(source);
-  const { text: rawOcr, confidence: ocrConfidence } = await extractRawOcr(processedImage);
+  let rawOcr = "";
+  let ocrConfidence: number | null = null;
+  let ocrError: string | undefined;
   try {
-    const draft = await extractStructuredPrescription(rawOcr, source, sourceMimeType);
+    const remainingOcrBudgetMs = Math.min(OCR_BUDGET_MS, Math.max(1_000, deadlineAt - Date.now() - GEMINI_BUDGET_MS));
+    const ocr = await extractRawOcr(processedImage, remainingOcrBudgetMs);
+    rawOcr = ocr.text;
+    ocrConfidence = ocr.confidence;
+  } catch (error) {
+    ocrError = error instanceof Error ? error.message : "OCR was unavailable.";
+  }
+  try {
+    const draft = await extractStructuredPrescription(rawOcr, source, sourceMimeType, deadlineAt);
     return { rawOcr, ocrConfidence, aiStatus: "complete", ...draft };
   } catch (error) {
-    return { rawOcr, ocrConfidence, aiStatus: "unavailable", aiError: error instanceof Error ? error.message : "AI extraction was unavailable.", sourceLanguageCode: "und", sourceLanguageName: "Undetermined", sourceScript: "Unknown", correctedText: "", summary: "", medicines: [], importantFindings: [], tags: [] };
+    const aiError = error instanceof Error ? error.message : "AI extraction was unavailable.";
+    return { rawOcr, ocrConfidence, aiStatus: "unavailable", aiError: ocrError ? `${ocrError} ${aiError}` : aiError, sourceLanguageCode: "und", sourceLanguageName: "Undetermined", sourceScript: "Unknown", correctedText: "", summary: "", medicines: [], importantFindings: [], tags: [] };
   }
 }
