@@ -68,6 +68,8 @@ describe("ClinicOCR landing page", () => {
     render(<Landing />);
     expect(screen.getByText(/How ClinicOCR works/i)).toBeInTheDocument();
     expect(screen.getByText(/Secure sign in/i)).toBeInTheDocument();
+    expect(screen.getByText("Language aware")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Workflow" })).toBeInTheDocument();
     expect(screen.getByTestId("hero-staged-copy")).toBeInTheDocument();
     expect(screen.getByTestId("hero-signal-trace")).toBeInTheDocument();
     expect(screen.getByTestId("about-evidence-flow")).toBeInTheDocument();
