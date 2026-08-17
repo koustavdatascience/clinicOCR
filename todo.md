@@ -149,3 +149,6 @@
 - [x] Reorganize the repository into clearly labeled frontend, backend, and supporting folders without breaking Vercel deployment.
 - [x] Remove safe Manus-specific repository artifacts and simplify the README with a concise “Made with Manus and …” credit.
 - [x] Add a simple MIT open-source license to the repository.
+- [ ] Determine whether the existing Vercel project can use clinicocr.vercel.app as its public address instead of clinicocr-three.vercel.app.
+- [ ] Remove the visible Manus-agent commit attribution from the GitHub repository history only after confirming the required safe rewrite details.
+- [ ] Rewrite approved commit history to ClinicOCR Contributors, force-push main, and verify the updated GitHub attribution.
