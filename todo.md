@@ -21,8 +21,8 @@
 - [x] Add server and UI tests covering validation, safety invariants, data procedures, and primary user flows.
 - [x] Verify desktop and tablet renderings, error states, loading states, and responsive interaction quality.
 - [x] Add integration tests for clinic router procedures: patient CRUD, duplicate detection, dashboard statistics, prescription save, metadata updates, and search filters.
-- [ ] Add end-to-end UI coverage for upload, review, explicit save, patient history, important records, notes, and PDF export.
-- [ ] Perform authenticated desktop and tablet visual QA for the dashboard, patients, upload, review, detail, and search workflows.
+- [x] Add end-to-end UI coverage for upload, review, explicit save, patient history, important records, notes, and PDF export.
+- [x] Perform authenticated desktop and tablet visual QA for the dashboard, patients, upload, review, detail, and search workflows.
 - [x] Add successful patient create, update, deletion, and directory search assertions to the clinic router integration suite.
 - [x] Configure the supplied Neon PostgreSQL URL and Gemini API key through secure project environment variables.
 - [x] Migrate the persistence layer from the template database dialect to Neon PostgreSQL and validate the live schema.
@@ -30,3 +30,7 @@
 - [x] Migrate the canonical Drizzle schema and migration configuration from MySQL to PostgreSQL/Neon.
 - [x] Move authentication user persistence to Neon so ClinicOCR no longer relies on the template MySQL database.
 - [x] Replace the one-off Neon setup script with an automated, versioned schema workflow and live schema validation.
+- [x] Add a cross-route integration test for upload, analyze, review, explicit save, patient history, metadata updates, and PDF export triggering.
+- [x] Add search-workflow UI coverage for saved-record filters and result navigation.
+- [x] Verify authenticated ClinicOCR routes at desktop and tablet sizes, including loading, empty, and not-found states.
+- [x] Add a unified upload-to-analysis-to-review-to-save workflow test with history, metadata, and PDF-export assertions.

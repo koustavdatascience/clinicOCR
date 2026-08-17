@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { clearDraft, readDraft, type DraftMedicine, type PrescriptionDraft } from "@/lib/clinic";
 import { trpc } from "@/lib/trpc";
 import { AlertTriangle, CheckCircle2, FileText, Plus, Save, ShieldCheck, Sparkles, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 
