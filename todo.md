@@ -79,9 +79,12 @@
 - [x] Ensure all credential-bearing local files are ignored and no deployable source file contains live ClinicOCR secrets.
 - [x] Add a safe Vercel environment-variable template and document how to provide each secret through Vercel rather than GitHub.
 - [x] Document the required credential rotation process if a key was ever committed or exposed.
-- [ ] Identify the intended Vercel project and confirm available encrypted environment-variable management capabilities.
-- [ ] Prepare the ClinicOCR production and preview environment-variable configuration without adding any secret values to GitHub.
-- [ ] Verify that no deployment was published and summarize any Vercel dashboard action that still requires the user’s direct input.
-- [ ] Create a new private GitHub repository named clinicOCR for the ClinicOCR source code.
-- [ ] Push the validated ClinicOCR project to the new repository after running the secret scan.
-- [ ] Confirm the new repository contains no credential-bearing tracked files before using it for Vercel linkage.
+- [x] Identify the intended Vercel project and confirm available encrypted environment-variable management capabilities.
+- [x] Prepare the confirmed Vercel Production and Preview environment variables without adding any secret values to GitHub.
+- [x] Verify that no deployment was published and summarize any Vercel dashboard action that still requires the user’s direct input.
+- [x] Create a new private GitHub repository named clinicOCR for the ClinicOCR source code.
+- [x] Push the validated ClinicOCR project to the new repository after running the secret scan.
+- [x] Confirm the new repository contains no credential-bearing tracked files before using it for Vercel linkage.
+- [x] Add the user-confirmed `GEMINI_API_KEY` and `NEON_DATABASE_URL` to the Vercel ClinicOCR project for Preview and Production without exposing their values in source control.
+- [x] Verify those two encrypted Vercel variables are present without revealing any secret contents.
+- [ ] Add the remaining Vercel variables: `JWT_SECRET`, `OAUTH_SERVER_URL`, `OWNER_OPEN_ID`, external S3 settings, `VITE_APP_ID`, and `VITE_OAUTH_PORTAL_URL`.

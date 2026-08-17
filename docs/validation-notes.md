@@ -15,3 +15,7 @@ During navigation, the browser visibly enters each section’s short viewport re
 The public top navigation exposes Hero, About, and Sign In controls. The Sign In navigation control successfully scrolls from the Hero to the third section, where the authenticated session presents the Open workspace action.
 
 From the settled Secure Sign In panel, activating Open workspace routed the authenticated browser session to `/workspace`, where the protected clinical dashboard loaded normally.
+
+## Vercel encrypted configuration
+
+The private `koustavdatascience/clinicOCR` repository was linked to the Vercel `clinicocr` project without creating a deployment. The user-confirmed `GEMINI_API_KEY` and `NEON_DATABASE_URL` were added as **Sensitive** environment variables for both Production and Preview. Their values are intentionally not recorded in this repository or in these notes.
