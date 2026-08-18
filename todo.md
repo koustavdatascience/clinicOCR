@@ -134,8 +134,8 @@
 - [x] Restyle the ClinicOCR landing hero with an editorial display typeface, a centered ResuMatch-inspired title composition, and responsive clinical brand alignment.
 - [x] Reduce the landing hero to a concise headline, one precise supporting line, and one primary action.
 - [x] Identify the exact licensed ResuMatch hero display font from the referenced source, then apply it to the ClinicOCR landing hero with an accessible fallback.
-- [ ] Fine-tune the Instrument Serif hero: lower and enlarge the headline, reduce the supporting line and primary button, and remove the title divider.
-- [ ] Add an interactive ClinicOCR “How it works” sequence with upload, doctor review, and approved text-record steps inspired by the referenced ResuMatch interaction.
-- [ ] Change the public hero badge wording from “Clinician-led” to “Language aware” without changing its visual treatment.
-- [ ] Rebalance the centered landing navigation and replace its duplicate “Sign in” label with a distinct section label while keeping the right-side Sign in action.
+- [x] Fine-tune the Instrument Serif hero: lower and enlarge the headline, reduce the supporting line and primary button, and remove the title divider.
+- [x] Add an interactive ClinicOCR “How it works” sequence with upload, doctor review, and approved text-record steps inspired by the referenced ResuMatch interaction.
+- [x] Change the public hero badge wording from “Clinician-led” to “Language aware” without changing its visual treatment.
+- [x] Rebalance the centered landing navigation and replace its duplicate “Sign in” label with a distinct section label while keeping the right-side Sign in action.
 - [x] Create a concise ClinicOCR README covering purpose, live URL, stack, local setup, environment variables, and Vercel deployment.
