@@ -1,6 +1,8 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
+import { clerkClient, getAuth } from "@clerk/express";
 import type { User } from "../../drizzle/schema";
-import { sdk } from "./sdk";
+import { claimLegacyUserByEmail, getUserByOpenId, upsertUser } from "../db";
+import { ENV } from "./env";
 
 export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
@@ -15,9 +17,24 @@ export async function createContext(
   const startedAt = performance.now();
 
   try {
-    user = await sdk.authenticateRequest(opts.req);
-  } catch (error) {
-    // Authentication is optional for public procedures.
+    if (ENV.clerkSecretKey) {
+      const { userId } = getAuth(opts.req);
+      if (userId) {
+        user = await getUserByOpenId(userId) as User | undefined ?? null;
+        if (!user) {
+          const clerkUser = await clerkClient.users.getUser(userId);
+          const email = clerkUser.primaryEmailAddress?.emailAddress ?? null;
+          const name = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") || clerkUser.username || null;
+          const identity = { openId: userId, name, email, loginMethod: "clerk", role: "user" as const };
+          user = await claimLegacyUserByEmail(identity) as User | undefined ?? null;
+          if (!user) {
+            await upsertUser(identity);
+            user = await getUserByOpenId(userId) as User | undefined ?? null;
+          }
+        }
+      }
+    }
+  } catch {
     user = null;
   }
 

@@ -1,65 +1,72 @@
 # Secure Vercel Deployment Guide
 
-ClinicOCR can be connected to a Git repository without placing secrets in that repository. The committed [`VERCEL_ENVIRONMENT_TEMPLATE.txt`](./VERCEL_ENVIRONMENT_TEMPLATE.txt) intentionally contains **variable names only**. Put real values in **Vercel Project Settings → Environment Variables**, where sensitive variables are protected from ordinary dashboard display and injected into the serverless runtime rather than written to source control. [1]
+ClinicOCR can use GitHub as its source repository without committing operational credentials. The committed [`VERCEL_ENVIRONMENT_TEMPLATE.txt`](./VERCEL_ENVIRONMENT_TEMPLATE.txt) contains **variable names only**. Add values in **Vercel Project Settings → Environment Variables** so they are injected into the deployed runtime rather than stored in Git history. [1]
 
-> **Do not use any `VITE_*` variable for a secret.** Vite embeds `VITE_*` values in browser JavaScript. In ClinicOCR, `VITE_APP_ID` and `VITE_OAUTH_PORTAL_URL` are public client configuration; database URLs, Gemini keys, JWT material, object-storage credentials, and OAuth service values must remain server-only.
+> **Never commit a populated `.env` file.** In particular, `NEON_DATABASE_URL`, `GEMINI_API_KEY`, and `CLERK_SECRET_KEY` must remain server-only. Clerk’s publishable key is browser-visible by design, but it should still be configured in Vercel rather than copied into source code.
 
-## 1. GitHub safety
+## 1. Required Vercel variables
 
-The repository ignores `.env`, `.env.*`, and `.vercel/`. Before connecting GitHub to Vercel, run the following command locally or in CI:
+| Variable | Purpose | Vercel scope |
+|---|---|---|
+| `NEON_DATABASE_URL` | Canonical Neon PostgreSQL clinical-record database connection | Sensitive; Production and Preview |
+| `GEMINI_API_KEY` | Server-side prescription OCR/AI extraction | Sensitive; Production and Preview |
+| `CLERK_SECRET_KEY` | Server-side Clerk request verification | Sensitive; Production and Preview |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Browser Clerk configuration; mapped to Vite’s public Clerk variable during build | Production and Preview |
+| `NODE_ENV=production` | Production runtime setting | Production |
+
+The Vercel project already contains the required Clerk values. ClinicOCR deliberately reads the public Clerk value from `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` at build time and maps it to the Vite-compatible browser setting, so a second `VITE_CLERK_PUBLISHABLE_KEY` is not required.
+
+## 2. Authentication cutover and legacy records
+
+ClinicOCR now uses Clerk for clinician sign-in. The Express API verifies each Clerk session before creating its tRPC context. The client also forwards a current Clerk session token for API requests, which supports normal browser sessions and authenticated client calls.
+
+For a seamless one-time cutover, the first Clerk sign-in should use the **same verified email address** stored on the legacy ClinicOCR clinician profile. ClinicOCR then safely changes that single matching Neon user record to the Clerk user ID, preserving the owner relationship for its patients and prescriptions. If there is no verified email match, ClinicOCR creates a separate clinician workspace rather than guessing ownership.
+
+| Record type | Cutover behavior |
+|---|---|
+| Newly approved prescriptions | Store doctor-reviewed text, raw OCR evidence, medicines, tags, notes, language metadata, and audit timestamps; no uploaded image reference is saved. |
+| In-review upload | Kept only in the browser session for the clinician’s review and discarded after explicit approval or draft discard. |
+| Existing prescriptions | Remain readable as Neon records. Their legacy image references are not required for clinical text, and are not migrated to a new storage provider. |
+
+Before inviting any clinician, set the production Vercel domain in Clerk’s allowed origins and redirect configuration. Clerk’s hosted sign-in uses the configured instance and publishable key; follow Clerk’s production-instance/domain guidance when changing domains. [2]
+
+## 3. GitHub safety
+
+The repository ignores `.env`, `.env.*`, and `.vercel/`. Run the following command before push or in CI:
 
 ```bash
 pnpm verify:secrets
 ```
 
-This reports only affected filenames if a tracked file resembles a supported credential pattern; it never prints a detected secret. Never commit a populated `.env` file, exported Vercel settings, or a `.vercel/project.json` file.
+The scan reports only affected filenames if a tracked file resembles a credential pattern; it never prints a detected value. Do not commit Vercel exports, `.vercel/project.json`, or a populated environment file.
 
-## 2. Vercel environment variables
+## 4. OCR runtime boundary
 
-| Variable | Purpose | Set in Vercel as |
-|---|---|---|
-| `NEON_DATABASE_URL` | Canonical PostgreSQL connection | Sensitive, Production and Preview |
-| `GEMINI_API_KEY` | Server-side prescription extraction | Sensitive, Production and Preview |
-| `JWT_SECRET` | Session-cookie signing | Sensitive, Production and Preview |
-| `OAUTH_SERVER_URL` | OAuth service endpoint | Sensitive, Production and Preview |
-| `OWNER_OPEN_ID` | Initial clinic owner identifier | Sensitive, Production and Preview |
-| `STORAGE_PROVIDER=s3` | Enables external object storage | Normal configuration |
-| `S3_BUCKET`, `S3_REGION`, `S3_ENDPOINT` | External image-storage location | Sensitive, Production and Preview |
-| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | External image-storage access | Sensitive, Production and Preview |
-| `VITE_APP_ID`, `VITE_OAUTH_PORTAL_URL` | Public browser OAuth configuration | Normal configuration |
+The Vercel function is configured with a `maxDuration` of 60 seconds. The prescription pipeline performs image preprocessing, Tesseract OCR, and Gemini structured extraction during the temporary analysis request. Monitor representative upload duration after deployment and increase the configured duration only if the selected Vercel plan supports it. [3]
 
-Add sensitive values through the Vercel dashboard or with `vercel env add NAME production --sensitive`; do **not** store them in GitHub Actions variables unless an automation workflow truly needs them. Vercel documents sensitive environment-variable management for deployment environments. [1]
+If sustained OCR traffic exceeds the serverless execution window, move only the OCR worker to queue-backed or always-on compute while retaining the React application, Clerk authentication, Neon database, and text-only clinical record boundary.
 
-## 3. External services required outside Manus
+## 5. Build and publish sequence
 
-ClinicOCR currently uses Manus Forge storage by default. A Vercel deployment must set `STORAGE_PROVIDER=s3` and provide a private S3-compatible bucket. The server creates pre-signed read URLs; original prescription images stay private and are not copied into the Git repository. Existing Manus-stored images must be migrated separately before switching a live clinic to external storage.
+Import the GitHub repository in Vercel with the repository root as the project root. The committed `vercel.json` builds the Vite client into `dist/public`, sends `/api/*` to the Express function in `api/index.ts`, and rewrites browser routes to the SPA entry point. Vercel supports a default-exported Express application as a Node.js function. [4]
 
-The Manus OAuth callback must permit the deployed URL:
+Run the following locally before the first production deployment:
 
-```text
-https://YOUR-VERCEL-DOMAIN/api/oauth/callback
+```bash
+pnpm check
+pnpm test
+pnpm build:vercel
 ```
 
-Update the OAuth application’s allowed callback URL before production traffic. After the first deployment, add the exact Vercel preview or production domain required by the OAuth provider.
-
-## 4. Runtime boundary for OCR
-
-The Vercel function is configured with a `maxDuration` of 60 seconds. This is appropriate for a first deployment, but the prescription pipeline includes image preprocessing and Tesseract OCR before Gemini extraction. Monitor real upload timings and increase the configured duration only when the Vercel plan supports it; Vercel supports per-function duration settings in `vercel.json`. [3]
-
-If sustained OCR traffic or long-language-model processing exceeds the serverless execution window, move only the OCR worker to a queue-backed or always-on compute service while keeping the React application, API, Neon database, and private object storage on their current interfaces.
-
-## 5. Vercel project setup
-
-Import the repository in Vercel and keep the root directory at the repository root. The committed `vercel.json` builds the Vite client into `dist/public`, routes `/api/*` to the default-exported Express function in `api/index.ts`, and rewrites browser routes to the SPA entry point. Vercel supports a default-exported Express application as a Node.js function. [2]
-
-Run `pnpm build:vercel` locally before creating the deployment. Do **not** publish a Vercel project until all required environment variables, the OAuth callback, and external S3-compatible storage are configured.
+After a clean checkpoint is created, use the **Publish** button in the project interface to deploy. Do not commit secrets or manually modify production database data during the cutover.
 
 ## 6. If a credential is exposed
 
-Immediately revoke or rotate the exposed value at its provider. Update the replacement only in Vercel’s sensitive environment settings, redeploy, and review GitHub history and access logs. Removing a value from a later commit is insufficient because the previous Git history may remain reachable.
+Immediately rotate the exposed value at the corresponding provider. Enter the replacement only through Vercel’s sensitive environment settings, redeploy, and review GitHub history and provider access logs. Removing a value in a later commit is insufficient because prior Git history may remain reachable.
 
 ## References
 
 [1]: https://vercel.com/docs/cli/env "Vercel CLI environment variables"
-[2]: https://vercel.com/docs/frameworks/backend/express "Vercel Express deployment"
+[2]: https://clerk.com/docs/deployments/overview "Clerk deployment overview"
 [3]: https://vercel.com/docs/functions/configuring-functions/duration "Vercel function duration configuration"
+[4]: https://vercel.com/docs/frameworks/backend/express "Vercel Express deployment"

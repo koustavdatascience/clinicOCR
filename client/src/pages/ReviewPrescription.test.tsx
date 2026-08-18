@@ -18,10 +18,7 @@ import ReviewPrescription from "./ReviewPrescription";
 
 const draft: PrescriptionDraft = {
   patientId: 9,
-  originalFilename: "prescription.jpg",
-  originalMimeType: "image/jpeg",
-  imageKey: "clinicocr/9/original.jpg",
-  imageUrl: "/manus-storage/clinicocr/9/original.jpg",
+  reviewImageUrl: "blob:temporary-prescription-preview",
   rawOcr: "RAW OCR TEXT\nLINE TWO",
   correctedText: "Date: 20-09-2022 | Name: Ashvika | Age, Gender: 4 yr / F | Advice: SYP CALPOL 4 mL Q6H",
   summary: "Doctor review required",
@@ -68,5 +65,8 @@ describe("ReviewPrescription", () => {
       doctorNotes: "Recheck in one week",
       important: true,
     })));
+    expect(saveMutate.mock.calls[0]?.[0]).not.toHaveProperty("imageKey");
+    expect(saveMutate.mock.calls[0]?.[0]).not.toHaveProperty("imageUrl");
+    expect(saveMutate.mock.calls[0]?.[0]).not.toHaveProperty("originalFilename");
   });
 });

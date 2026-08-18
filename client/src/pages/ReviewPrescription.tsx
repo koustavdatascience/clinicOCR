@@ -56,10 +56,6 @@ export default function ReviewPrescription() {
   const saveRecord = () => {
     save.mutate({
       patientId: draft.patientId,
-      imageKey: draft.imageKey,
-      imageUrl: draft.imageUrl,
-      originalFilename: draft.originalFilename,
-      originalMimeType: draft.originalMimeType,
       rawOcr: draft.rawOcr,
       sourceLanguageCode: draft.sourceLanguageCode || "und",
       sourceLanguageName: draft.sourceLanguageName || "Undetermined",
@@ -82,7 +78,7 @@ export default function ReviewPrescription() {
         <PageHeader
           eyebrow="Doctor review required"
           title="Review prescription"
-          description="Use the source image to confirm each field, then save the reviewed record when ready."
+          description="Use the temporary source image to confirm each field, then save the reviewed text record when ready."
           actions={<Button variant="outline" className="border-slate-200 bg-white" onClick={() => { clearDraft(); setLocation("/upload"); }}>Discard draft</Button>}
         />
 
@@ -103,9 +99,9 @@ export default function ReviewPrescription() {
                   <Badge className="bg-teal-50 text-teal-700 hover:bg-teal-50">Source</Badge>
                 </div>
                 <div className="flex min-h-[400px] items-center justify-center bg-[linear-gradient(145deg,#f8fbfb,#eef7f5)] p-5">
-                  <img src={draft.imageUrl} alt="Original prescription upload" className="max-h-[620px] w-full rounded-xl object-contain shadow-[0_12px_30px_rgba(15,70,70,0.1)]" />
+                  {draft.reviewImageUrl ? <img src={draft.reviewImageUrl} alt="Temporary prescription review source" className="max-h-[620px] w-full rounded-xl object-contain shadow-[0_12px_30px_rgba(15,70,70,0.1)]" /> : <p className="max-w-xs text-center text-sm leading-6 text-slate-500">The temporary source image is no longer available. Upload again if you need to check the handwriting before approval.</p>}
                 </div>
-                <div className="border-t border-slate-100 px-5 py-3 text-xs text-slate-500"><div className="flex items-center gap-2"><ImageIcon className="h-4 w-4 text-teal-700" />Original image remains unchanged.</div>{draft.sourceLanguageName && <p className="mt-2 text-teal-800"><strong>Detected source:</strong> {draft.sourceLanguageName}{draft.sourceScript ? ` · ${draft.sourceScript} script` : ""}</p>}</div>
+                <div className="border-t border-slate-100 px-5 py-3 text-xs text-slate-500"><div className="flex items-center gap-2"><ImageIcon className="h-4 w-4 text-teal-700" />Temporary source image — removed after approval.</div>{draft.sourceLanguageName && <p className="mt-2 text-teal-800"><strong>Detected source:</strong> {draft.sourceLanguageName}{draft.sourceScript ? ` · ${draft.sourceScript} script` : ""}</p>}</div>
               </CardContent>
             </Card>
           </aside>

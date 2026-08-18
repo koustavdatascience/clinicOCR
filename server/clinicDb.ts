@@ -10,10 +10,6 @@ export type PatientInput = {
 
 export type PrescriptionInput = {
   patientId: number;
-  imageKey: string;
-  imageUrl: string;
-  originalFilename: string;
-  originalMimeType: string;
   rawOcr: string;
   sourceLanguageCode?: string | null;
   sourceLanguageName?: string | null;
@@ -69,10 +65,10 @@ function mapPrescription(row: Row) {
     id: Number(row.id),
     ownerId: Number(row.owner_id),
     patientId: Number(row.patient_id),
-    imageKey: String(row.image_key),
-    imageUrl: String(row.image_url),
-    originalFilename: String(row.original_filename),
-    originalMimeType: String(row.original_mime_type),
+    imageKey: row.image_key === null || row.image_key === undefined ? null : String(row.image_key),
+    imageUrl: row.image_url === null || row.image_url === undefined ? null : String(row.image_url),
+    originalFilename: row.original_filename === null || row.original_filename === undefined ? null : String(row.original_filename),
+    originalMimeType: row.original_mime_type === null || row.original_mime_type === undefined ? null : String(row.original_mime_type),
     rawOcr: String(row.raw_ocr),
     sourceLanguageCode: row.source_language_code === null || row.source_language_code === undefined ? null : String(row.source_language_code),
     sourceLanguageName: row.source_language_name === null || row.source_language_name === undefined ? null : String(row.source_language_name),
@@ -116,7 +112,7 @@ export async function getDashboard(ownerId: number) {
       id: Number(row.id),
       patientId: Number(row.patient_id),
       patientName: String(row.patient_name),
-      imageUrl: String(row.image_url),
+      imageUrl: row.image_url === null || row.image_url === undefined ? null : String(row.image_url),
       tags: asArray<string>(row.tags),
       important: Boolean(row.important),
       createdAt: asDate(row.created_at),
@@ -204,7 +200,7 @@ export async function listPatientPrescriptions(ownerId: number, patientId: numbe
   );
   return rows.map(row => ({
     id: Number(row.id),
-    imageUrl: String(row.image_url),
+    imageUrl: row.image_url === null || row.image_url === undefined ? null : String(row.image_url),
     aiSummary: String(row.ai_summary),
     tags: asArray<string>(row.tags),
     important: Boolean(row.important),
@@ -245,7 +241,7 @@ export async function createPrescription(ownerId: number, input: PrescriptionInp
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::jsonb, $14::jsonb, $15::jsonb, $16, $17, $18)
     RETURNING id`,
     [
-      ownerId, input.patientId, input.imageKey, input.imageUrl, input.originalFilename, input.originalMimeType,
+      ownerId, input.patientId, null, null, null, null,
       input.rawOcr, input.sourceLanguageCode ?? null, input.sourceLanguageName ?? null, input.sourceScript ?? null,
       input.correctedText, input.aiSummary, JSON.stringify(input.medicines), JSON.stringify(input.importantFindings),
       JSON.stringify(input.tags), input.doctorNotes ?? null, input.important ?? false, input.ocrConfidence ?? null,
@@ -318,7 +314,7 @@ export async function searchPrescriptions(
     id: Number(row.id),
     patientId: Number(row.patient_id),
     patientName: String(row.patient_name),
-    imageUrl: String(row.image_url),
+    imageUrl: row.image_url === null || row.image_url === undefined ? null : String(row.image_url),
     tags: asArray<string>(row.tags),
     important: Boolean(row.important),
     medicines: asArray<Medicine>(row.medicines),

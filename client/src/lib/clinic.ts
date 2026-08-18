@@ -2,10 +2,7 @@ export type DraftMedicine = { name: string; dosage: string; frequency: string };
 
 export type PrescriptionDraft = {
   patientId: number;
-  originalFilename: string;
-  originalMimeType: "image/jpeg" | "image/png";
-  imageKey: string;
-  imageUrl: string;
+  reviewImageUrl?: string | null;
   rawOcr: string;
   sourceLanguageCode?: string;
   sourceLanguageName?: string;

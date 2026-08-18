@@ -31,7 +31,7 @@ function mapUser(row: UserRow) {
 export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) throw new Error("User openId is required for upsert");
 
-  const role = user.role ?? (user.openId === ENV.ownerOpenId ? "admin" : "user");
+  const role = user.role ?? "user";
   const lastSignedIn = user.lastSignedIn ?? new Date();
   await getNeonPool().query(
     `INSERT INTO clinic_users (open_id, name, email, login_method, role, last_signed_in)
@@ -51,6 +51,30 @@ export async function getUserByOpenId(openId: string) {
   const result = await getNeonPool().query<UserRow>(
     "SELECT * FROM clinic_users WHERE open_id = $1 LIMIT 1",
     [openId],
+  );
+  return result.rows[0] ? mapUser(result.rows[0]) : undefined;
+}
+
+/** Claims a pre-Clerk ClinicOCR user only when Clerk has verified the same email address. */
+export async function claimLegacyUserByEmail(user: InsertUser) {
+  if (!user.openId || !user.email) return undefined;
+  const result = await getNeonPool().query<UserRow>(
+    `UPDATE clinic_users
+     SET open_id = $1,
+         name = COALESCE($2, name),
+         email = $3,
+         login_method = 'clerk',
+         last_signed_in = NOW(),
+         updated_at = NOW()
+     WHERE id = (
+       SELECT id FROM clinic_users
+       WHERE LOWER(email) = LOWER($3) AND open_id <> $1
+       ORDER BY updated_at DESC
+       LIMIT 1
+     )
+     AND NOT EXISTS (SELECT 1 FROM clinic_users WHERE open_id = $1)
+     RETURNING *`,
+    [user.openId, user.name ?? null, user.email],
   );
   return result.rows[0] ? mapUser(result.rows[0]) : undefined;
 }

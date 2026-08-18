@@ -21,14 +21,9 @@ vi.mock("./prescriptionPipeline", () => ({
   decodePrescriptionUpload: vi.fn(() => ({ buffer: Buffer.from("image"), mimeType: "image/jpeg" })),
 }));
 
-vi.mock("./storage", () => ({
-  storagePut: vi.fn(),
-}));
-
 import * as clinicDb from "./clinicDb";
 import { clinicRouter } from "./clinicRouter";
 import * as pipeline from "./prescriptionPipeline";
-import * as storage from "./storage";
 
 function createCaller() {
   const ctx = {
@@ -96,10 +91,6 @@ describe("ClinicOCR procedure integration", () => {
 
     await expect(createCaller().prescriptions.save({
       patientId: 7,
-      imageKey: "clinicocr/42/original.jpg",
-      imageUrl: "/manus-storage/clinicocr/42/original.jpg",
-      originalFilename: "original.jpg",
-      originalMimeType: "image/jpeg",
       rawOcr: "RAW\nOCR\n",
       correctedText: "Reviewed text",
       aiSummary: "Reviewed summary",
@@ -112,10 +103,10 @@ describe("ClinicOCR procedure integration", () => {
     })).resolves.toEqual(saved);
 
     expect(clinicDb.createPrescription).toHaveBeenCalledWith(42, expect.objectContaining({ rawOcr: "RAW\nOCR\n", important: true }));
+    expect(clinicDb.createPrescription).toHaveBeenCalledWith(42, expect.not.objectContaining({ imageKey: expect.anything(), imageUrl: expect.anything() }));
   });
 
   it("keeps analysis as an unsaved draft and does not create a prescription", async () => {
-    vi.mocked(storage.storagePut).mockResolvedValue({ key: "original-key", url: "/manus-storage/original-key" });
     vi.mocked(pipeline.analyzePrescriptionImage).mockResolvedValue({
       rawOcr: "raw output",
       correctedText: "draft",
@@ -134,6 +125,8 @@ describe("ClinicOCR procedure integration", () => {
     });
 
     expect(draft.rawOcr).toBe("raw output");
+    expect(draft).not.toHaveProperty("imageKey");
+    expect(draft).not.toHaveProperty("imageUrl");
     expect(clinicDb.createPrescription).not.toHaveBeenCalled();
   });
 

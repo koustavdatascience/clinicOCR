@@ -52,6 +52,7 @@ const record = {
 import PrescriptionDetail from "./PrescriptionDetail";
 
 beforeEach(() => {
+  record.prescription.imageUrl = "/original.jpg";
   updateMutate.mockReset();
   pdfSave.mockReset();
   toastError.mockReset();
@@ -67,6 +68,18 @@ beforeEach(() => {
 afterEach(() => cleanup());
 
 describe("PrescriptionDetail", () => {
+  it("keeps source-image access for legacy records but presents new records as text-only", () => {
+    const { unmount } = render(<PrescriptionDetail />);
+    expect(screen.getByAltText("Legacy prescription source")).toHaveAttribute("src", "/original.jpg");
+    expect(screen.getByText("Legacy record")).toBeInTheDocument();
+    unmount();
+
+    record.prescription.imageUrl = null as unknown as string;
+    render(<PrescriptionDetail />);
+    expect(screen.getByText("Text-only record")).toBeInTheDocument();
+    expect(screen.queryByAltText("Legacy prescription source")).not.toBeInTheDocument();
+  });
+
   it("hides raw OCR while retaining the reviewed record and uncertainty indicators", async () => {
     render(<PrescriptionDetail />);
     expect(await screen.findByText(/Reviewed content/i)).toBeInTheDocument();

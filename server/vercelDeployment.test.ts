@@ -10,11 +10,12 @@ describe("Vercel deployment safety", () => {
     const template = readProjectFile("docs/VERCEL_ENVIRONMENT_TEMPLATE.txt");
     expect(template).toContain("NEON_DATABASE_URL=");
     expect(template).toContain("GEMINI_API_KEY=");
-    expect(template).toContain("S3_SECRET_ACCESS_KEY=");
+    expect(template).toContain("CLERK_SECRET_KEY=");
+    expect(template).toContain("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=");
     const credentialLines = template
       .split(/\r?\n/)
-      .filter(line => /^(NEON_DATABASE_URL|GEMINI_API_KEY|JWT_SECRET|OAUTH_SERVER_URL|OWNER_OPEN_ID|S3_BUCKET|S3_REGION|S3_ENDPOINT|S3_ACCESS_KEY_ID|S3_SECRET_ACCESS_KEY)=/.test(line));
-    expect(credentialLines).toHaveLength(10);
+      .filter(line => /^(NEON_DATABASE_URL|GEMINI_API_KEY|CLERK_SECRET_KEY)=/.test(line));
+    expect(credentialLines).toHaveLength(3);
     expect(credentialLines.every(line => line.endsWith("="))).toBe(true);
   });
 

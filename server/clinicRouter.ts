@@ -15,7 +15,6 @@ import {
   updatePrescriptionMeta,
 } from "./clinicDb";
 import { analyzePrescriptionImage, decodePrescriptionUpload } from "./prescriptionPipeline";
-import { storagePut } from "./storage";
 import { protectedProcedure, router } from "./_core/trpc";
 
 const patientSchema = z.object({
@@ -34,10 +33,6 @@ const medicineSchema = z.object({
 function ensurePatient(result: unknown) {
   if (!result) throw new TRPCError({ code: "NOT_FOUND", message: "Patient not found." });
   return result;
-}
-
-function sanitizeFilename(value: string) {
-  return value.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120) || "prescription-image";
 }
 
 export const clinicRouter = router({
@@ -104,20 +99,9 @@ export const clinicRouter = router({
       .mutation(async ({ ctx, input }) => {
         ensurePatient(await getPatient(ctx.user.id, input.patientId));
         const upload = decodePrescriptionUpload(input.dataUrl);
-        const originalFilename = sanitizeFilename(input.filename);
-        const extension = upload.mimeType === "image/png" ? "png" : "jpg";
-        const original = await storagePut(
-          `clinicocr/${ctx.user.id}/originals/${Date.now()}-${originalFilename}.${extension}`,
-          upload.buffer,
-          upload.mimeType,
-        );
         const analysis = await analyzePrescriptionImage(upload.buffer, upload.mimeType);
         return {
           patientId: input.patientId,
-          originalFilename,
-          originalMimeType: upload.mimeType,
-          imageKey: original.key,
-          imageUrl: original.url,
           ...analysis,
         };
       }),
@@ -125,10 +109,6 @@ export const clinicRouter = router({
       .input(
         z.object({
           patientId: z.number().int().positive(),
-          imageKey: z.string().min(1),
-          imageUrl: z.string().min(1),
-          originalFilename: z.string().min(1).max(255),
-          originalMimeType: z.enum(["image/jpeg", "image/png"]),
           rawOcr: z.string(),
           sourceLanguageCode: z.string().trim().min(2).max(24).optional(),
           sourceLanguageName: z.string().trim().min(1).max(80).optional(),

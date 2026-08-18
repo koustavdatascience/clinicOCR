@@ -6,12 +6,11 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const route = vi.hoisted(() => ({ setLocation: vi.fn() }));
-const auth = vi.hoisted(() => ({ user: null as { id: number } | null, loading: false }));
-const startLogin = vi.hoisted(() => vi.fn());
+const login = vi.hoisted(() => vi.fn());
+const auth = vi.hoisted(() => ({ user: null as { id: number } | null, loading: false, login }));
 const scrollIntoView = vi.hoisted(() => vi.fn());
 
 vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => auth }));
-vi.mock("@/const", () => ({ startLogin }));
 vi.mock("wouter", () => ({ useLocation: () => ["/", route.setLocation] }));
 
 import Landing, { getLandingMotionPlan } from "./Landing";
@@ -25,7 +24,7 @@ beforeEach(() => {
   auth.user = null;
   auth.loading = false;
   route.setLocation.mockReset();
-  startLogin.mockReset();
+  login.mockReset();
   scrollIntoView.mockReset();
   Object.defineProperty(HTMLElement.prototype, "scrollIntoView", { configurable: true, value: scrollIntoView });
   window.history.replaceState({}, "", "/");
@@ -59,9 +58,9 @@ describe("ClinicOCR landing page", () => {
     expect(screen.getByTestId("signin-session-rings")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /enter clinicocr/i }));
     expect(scrollIntoView).toHaveBeenCalled();
-    expect(startLogin).not.toHaveBeenCalled();
+    expect(login).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: /sign in to clinicocr/i }));
-    expect(startLogin).toHaveBeenCalledTimes(1);
+    expect(login).toHaveBeenCalledTimes(1);
     expect(route.setLocation).not.toHaveBeenCalled();
   });
 

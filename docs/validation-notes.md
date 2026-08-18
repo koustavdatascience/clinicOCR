@@ -19,3 +19,15 @@ From the settled Secure Sign In panel, activating Open workspace routed the auth
 ## Vercel encrypted configuration
 
 The private `koustavdatascience/clinicOCR` repository was linked to the Vercel `clinicocr` project without creating a deployment. The user-confirmed `GEMINI_API_KEY` and `NEON_DATABASE_URL` were added as **Sensitive** environment variables for both Production and Preview. Their values are intentionally not recorded in this repository or in these notes.
+
+## Independent authentication
+
+The Vercel ClinicOCR project Integrations screen shows **Clerk** connected as an Authentication integration. The application-side migration will use this integration’s Vercel-managed configuration rather than committing authentication values to GitHub.
+
+The Vercel Environment Variables view confirms that `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` are both present as **Sensitive** variables for Production and Preview. Values were not displayed or recorded.
+
+## Post-migration browser validation status
+
+The local development preview renders a deliberate authentication-configuration notice because the local runtime does not have a Clerk publishable key injected. This confirms that the browser does not silently fall back to the removed Manus login path.
+
+The currently ready Vercel deployment is reachable and renders the previous landing experience. Its visible image-preservation copy predates the local Clerk and text-only-record migration, so it is not used as validation of the new source state. The updated source has passed TypeScript, automated workflow tests, Neon migration checks, and a production Vite build. Browser validation of the new Clerk sign-in and protected clinical workflow requires a fresh deployment built from the completed GitHub revision and a real Clerk session.

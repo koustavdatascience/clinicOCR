@@ -19,7 +19,6 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
 import { ClipboardPlus, LayoutDashboard, LogOut, PanelLeft, ScanLine, Search, Users } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
@@ -50,7 +49,7 @@ export default function DashboardLayout({
     const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
   });
-  const { loading, user, logout } = useAuth();
+  const { loading, user, login, logout } = useAuth();
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
@@ -70,7 +69,7 @@ export default function DashboardLayout({
             <p className="text-center text-sm leading-6 text-slate-500">Sign in to access patient records and reviewed prescription drafts.</p>
           </div>
           <Button
-            onClick={() => startLogin()}
+            onClick={login}
             size="lg"
             className="w-full bg-teal-700 shadow-lg shadow-teal-900/15 hover:bg-teal-800"
           >

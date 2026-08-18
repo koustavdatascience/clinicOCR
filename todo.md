@@ -88,3 +88,18 @@
 - [x] Add the user-confirmed `GEMINI_API_KEY` and `NEON_DATABASE_URL` to the Vercel ClinicOCR project for Preview and Production without exposing their values in source control.
 - [x] Verify those two encrypted Vercel variables are present without revealing any secret contents.
 - [ ] Add the remaining Vercel variables: `JWT_SECRET`, `OAUTH_SERVER_URL`, `OWNER_OPEN_ID`, external S3 settings, `VITE_APP_ID`, and `VITE_OAUTH_PORTAL_URL`.
+- [x] Select Clerk for independent authentication; external image storage is no longer required because approved prescriptions will retain text only.
+- [x] Replace Manus OAuth login and session handling with independently managed authentication while preserving existing clinician records.
+- [x] Supersede original-image migration: new reviewed prescriptions will not persist uploaded images after doctor approval.
+- [x] Remove Manus-only environment dependencies and complete the remaining Vercel environment configuration.
+- [x] Validate the fully independent Vercel deployment path and document the one-time data migration and cutover procedure.
+- [x] Supersede the new Supabase project and storage path because the account free-project limit blocks it and the text-only scope removes storage need.
+- [x] Evaluate free-tier alternatives to a new Supabase project for independent doctor authentication and private prescription-image storage.
+- [x] Recommend Clerk authentication with Neon for a low-cost independent text-only path that avoids changing the working Neon clinical-record database.
+- [x] Remove persistent image URLs and image-dependent saved-record UI while preserving temporary in-review image preview and OCR processing.
+- [x] Preserve existing saved records as legacy text records without re-uploading or migrating their original images.
+- [x] Replace Manus OAuth and session handling with Clerk authentication while preserving the existing Neon clinician identity linkage.
+- [x] Add Clerk configuration to Vercel without committing its publishable or secret keys to GitHub.
+- [ ] Run a comprehensive post-migration system check covering TypeScript, unit and integration tests, Neon schema and persistence, Clerk client/server wiring, text-only record safeguards, main browser flows, production build, credential scanning, and deployment configuration.
+- [x] Show the preserved source image only for legacy prescriptions with an existing image reference; show the text-only panel for newly approved records without one.
+- [ ] Perform browser-based validation of the Clerk sign-in handoff, protected workspace, upload-to-review-to-save workflow, search/detail pages, and text-only record behavior; record the results.
