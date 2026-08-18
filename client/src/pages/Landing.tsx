@@ -2,7 +2,6 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
-  ArrowDown,
   ArrowRight,
   CheckCircle2,
   FileScan,
@@ -17,7 +16,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 
 const entranceEase = [0.22, 1, 0.36, 1] as const;
-const heroLines = ["The prescription stays human.", "The record becomes clear."];
+const heroLines = ["Prescriptions,", "made clear."];
 
 export function getLandingMotionPlan(reducedMotion: boolean | null) {
   if (reducedMotion === true) {
@@ -60,15 +59,15 @@ export function getLandingNavigationState(scrollY: number) {
   return scrollY > 28 ? "compact" : "expanded";
 }
 
-function Brand({ compact = false }: { compact?: boolean }) {
+function Brand({ compact = false, onLight = false }: { compact?: boolean; onLight?: boolean }) {
   return (
-    <div className={`flex items-center text-white transition-all duration-300 ${compact ? "gap-2" : "gap-3"}`}>
-      <div className={`flex items-center justify-center rounded-[15px] bg-white font-bold text-teal-800 shadow-[0_10px_32px_rgba(0,0,0,0.18)] transition-all duration-300 ${compact ? "h-8 w-8 text-base" : "h-10 w-10 text-xl"}`}>
+    <div className={`flex items-center transition-all duration-300 ${onLight ? "text-slate-950" : "text-white"} ${compact ? "gap-2" : "gap-3"}`}>
+      <div className={`flex items-center justify-center rounded-[15px] font-bold shadow-[0_10px_32px_rgba(0,0,0,0.12)] transition-all duration-300 ${onLight ? "bg-teal-700 text-white" : "bg-white text-teal-800"} ${compact ? "h-8 w-8 text-base" : "h-10 w-10 text-xl"}`}>
         +
       </div>
       <div className="leading-none">
         <p className={`font-display font-bold tracking-[-0.06em] transition-all duration-300 ${compact ? "text-base" : "text-xl"}`}>ClinicOCR</p>
-        <p className={`mt-1 font-bold uppercase tracking-[0.18em] text-teal-200 transition-all duration-300 ${compact ? "hidden" : "text-[0.61rem]"}`}>Prescription intelligence</p>
+        <p className={`mt-1 font-bold uppercase tracking-[0.18em] transition-all duration-300 ${onLight ? "text-teal-700" : "text-teal-200"} ${compact ? "hidden" : "text-[0.61rem]"}`}>Prescription intelligence</p>
       </div>
     </div>
   );
@@ -86,11 +85,11 @@ function Label({ index, children }: { index: string; children: React.ReactNode }
 function StagedHeroHeading({ reducedMotion }: { reducedMotion: boolean | null }) {
   const still = reducedMotion === true;
   return (
-    <h1 data-testid="hero-staged-copy" className="mt-7 font-display text-[3.35rem] font-bold leading-[0.91] tracking-[-0.078em] text-white sm:text-7xl lg:text-[5.7rem]">
+    <h1 data-testid="hero-staged-copy" className="mt-7 font-editorial text-[3.9rem] font-medium leading-[0.79] tracking-[-0.07em] text-slate-950 sm:text-7xl lg:text-[7.35rem]">
       {heroLines.map((line, index) => (
         <span key={line} className="block overflow-hidden pb-[0.07em]">
           <motion.span
-            className={index === 1 ? "block bg-[linear-gradient(90deg,#92efe0,#d5fff7,#73d8e0)] bg-clip-text text-transparent" : "block"}
+            className={index === 1 ? "block text-teal-600" : "block"}
             initial={{ opacity: 0, y: still ? 0 : 34, filter: still ? "blur(0px)" : "blur(12px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: still ? 0 : 0.74, delay: still ? 0 : 0.2 + index * 0.15, ease: entranceEase }}
@@ -117,7 +116,7 @@ function EvidenceFlow({ reducedMotion }: { reducedMotion: boolean | null }) {
       initial={{ opacity: 0, y: still ? 0 : 28, scale: still ? 1 : 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: still ? 0 : 0.8, delay: still ? 0 : 0.9, ease: entranceEase }}
-      className="relative mx-auto mt-11 w-full max-w-4xl overflow-hidden rounded-[1.9rem] border border-white/16 bg-white/[0.07] p-3 shadow-[0_32px_96px_rgba(1,18,27,0.34)] backdrop-blur-sm sm:p-4"
+      className="relative mx-auto mt-14 w-full max-w-4xl overflow-hidden rounded-[1.9rem] border border-teal-900/10 bg-white p-3 shadow-[0_32px_82px_rgba(12,82,83,0.17)] sm:p-4"
     >
       <motion.div
         aria-hidden
@@ -279,29 +278,26 @@ export default function Landing() {
   };
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#062c36] text-white selection:bg-teal-300 selection:text-teal-950">
+    <main className="min-h-screen overflow-hidden bg-[#f8fbfa] text-slate-950 selection:bg-teal-200 selection:text-teal-950">
       <section id="hero" className="relative isolate min-h-screen overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_14%_12%,rgba(49,170,164,0.3),transparent_31%),radial-gradient(circle_at_87%_42%,rgba(118,219,206,0.16),transparent_26%),linear-gradient(150deg,#062c36_0%,#073c48_50%,#052b35_100%)]" />
-        <div className="pointer-events-none absolute inset-x-0 top-[22%] -z-10 h-px bg-gradient-to-r from-transparent via-teal-200/20 to-transparent" />
-        <nav data-testid="landing-navigation" data-navigation-state={navigationState} className={`fixed left-1/2 z-30 flex w-[calc(100%-2.5rem)] -translate-x-1/2 items-center justify-between transition-[top,max-width,padding,background-color,border-color,box-shadow,backdrop-filter] duration-300 ${compactNavigation ? "top-3 max-w-5xl rounded-2xl border border-white/18 bg-[#073b46]/72 px-4 py-3 shadow-[0_16px_42px_rgba(2,20,28,0.3)] backdrop-blur-xl md:w-[calc(100%-4rem)]" : "top-0 max-w-7xl px-0 py-6 md:w-[calc(100%-4rem)]"}`}>
-          <Brand compact={compactNavigation} />
-          <div className="hidden items-center gap-5 text-sm font-semibold text-teal-50/75 md:flex"><button className="transition-colors hover:text-white" onClick={() => scrollTo("hero")}>Home</button><button className="transition-colors hover:text-white" onClick={() => scrollTo("about")}>About</button><button className="transition-colors hover:text-white" onClick={() => scrollTo("signin")}>Sign in</button></div>
-          <Button onClick={() => scrollTo("signin")} variant="outline" className={`border-white/20 text-white transition-all duration-300 hover:bg-white hover:text-teal-950 ${compactNavigation ? "h-9 rounded-xl bg-white/12 px-3 text-xs" : "bg-white/10"}`}>{loading ? "Checking session" : user ? "Open workspace" : "Sign in"}<ArrowRight className="ml-2 h-4 w-4" /></Button>
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_14%_20%,rgba(126,236,197,0.25),transparent_25%),radial-gradient(circle_at_84%_38%,rgba(72,197,166,0.14),transparent_20%),linear-gradient(180deg,#fcfdfc_0%,#f4fbf8_72%,#eef8f5_100%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-[29%] -z-10 h-px bg-gradient-to-r from-transparent via-teal-900/10 to-transparent" />
+        <nav data-testid="landing-navigation" data-navigation-state={navigationState} className={`fixed left-1/2 z-30 flex w-[calc(100%-2.5rem)] -translate-x-1/2 items-center justify-between transition-[top,max-width,padding,background-color,border-color,box-shadow,backdrop-filter] duration-300 ${compactNavigation ? "top-3 max-w-5xl rounded-2xl border border-teal-900/10 bg-white/82 px-4 py-3 shadow-[0_16px_42px_rgba(13,92,89,0.12)] backdrop-blur-xl md:w-[calc(100%-4rem)]" : "top-0 max-w-7xl px-0 py-6 md:w-[calc(100%-4rem)]"}`}>
+          <Brand compact={compactNavigation} onLight />
+          <div className="hidden items-center gap-5 text-sm font-semibold text-slate-600 md:flex"><button className="transition-colors hover:text-teal-700" onClick={() => scrollTo("hero")}>Home</button><button className="transition-colors hover:text-teal-700" onClick={() => scrollTo("about")}>About</button><button className="transition-colors hover:text-teal-700" onClick={() => scrollTo("signin")}>Sign in</button></div>
+          <Button onClick={() => scrollTo("signin")} variant="outline" className={`border-teal-900/15 bg-white/80 text-slate-800 transition-all duration-300 hover:bg-teal-700 hover:text-white ${compactNavigation ? "h-9 rounded-xl px-3 text-xs" : "rounded-xl"}`}>{loading ? "Checking session" : user ? "Open workspace" : "Sign in"}<ArrowRight className="ml-2 h-4 w-4" /></Button>
         </nav>
 
-        <div className="relative mx-auto max-w-7xl px-5 pb-24 pt-14 lg:px-8 lg:pb-28 lg:pt-16">
-          <div className="mx-auto max-w-5xl text-center">
-            <motion.div initial={{ opacity: 0, y: still ? 0 : 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: still ? 0 : 0.56, ease: entranceEase }} className="inline-flex items-center gap-2 rounded-full border border-white/16 bg-white/[0.09] px-4 py-2 text-[0.66rem] font-bold uppercase tracking-[0.14em] text-teal-50 shadow-[0_12px_35px_rgba(0,0,0,0.14)]">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-200 text-teal-950"><Stethoscope className="h-3 w-3" /></span>
-              <span>Clinical review intelligence</span>
-              <span className="h-1 w-1 rounded-full bg-teal-200" />
-              <span className="text-teal-200">Language aware</span>
+        <div className="relative mx-auto max-w-7xl px-5 pb-24 pt-28 lg:px-8 lg:pb-28 lg:pt-32">
+          <div className="mx-auto max-w-6xl text-center">
+            <motion.div initial={{ opacity: 0, y: still ? 0 : 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: still ? 0 : 0.56, ease: entranceEase }} className="inline-flex items-center gap-2 rounded-full border border-teal-900/10 bg-white px-4 py-2 text-[0.66rem] font-bold uppercase tracking-[0.14em] text-teal-800 shadow-[0_12px_35px_rgba(13,92,89,0.08)]">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-700 text-white"><Stethoscope className="h-3 w-3" /></span>
+              <span>Clinician-led</span>
             </motion.div>
             <StagedHeroHeading reducedMotion={reducedMotion} />
-            <motion.p initial={{ opacity: 0, y: still ? 0 : 16, filter: still ? "blur(0px)" : "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ duration: still ? 0 : 0.7, delay: still ? 0 : 0.58, ease: entranceEase }} className="mx-auto mt-7 max-w-2xl text-base leading-7 text-teal-50/80 sm:text-lg">ClinicOCR turns handwritten prescriptions—across languages—into organized, searchable text records while keeping the doctor in control.</motion.p>
-            <motion.div initial={{ opacity: 0, y: still ? 0 : 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: still ? 0 : 0.64, delay: still ? 0 : 0.72, ease: entranceEase }} className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button onClick={() => scrollTo("signin")} size="lg" className="h-12 rounded-xl bg-white px-6 text-base font-bold text-teal-950 shadow-[0_18px_35px_rgba(0,0,0,0.22)] hover:bg-teal-50">Enter ClinicOCR<ArrowRight className="ml-2 h-4 w-4" /></Button>
-              <Button onClick={() => scrollTo("about")} variant="ghost" className="text-teal-50 hover:bg-white/10 hover:text-white">See how it works<ArrowDown className="ml-2 h-4 w-4" /></Button>
+            <motion.p initial={{ opacity: 0, y: still ? 0 : 16, filter: still ? "blur(0px)" : "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ duration: still ? 0 : 0.7, delay: still ? 0 : 0.58, ease: entranceEase }} className="mx-auto mt-8 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">From handwriting to reviewed records.</motion.p>
+            <motion.div initial={{ opacity: 0, y: still ? 0 : 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: still ? 0 : 0.64, delay: still ? 0 : 0.72, ease: entranceEase }} className="mt-8 flex justify-center">
+              <Button onClick={() => scrollTo("signin")} size="lg" className="h-12 rounded-xl bg-teal-700 px-7 text-base font-bold text-white shadow-[0_18px_35px_rgba(9,112,103,0.22)] hover:bg-teal-800">Enter ClinicOCR<ArrowRight className="ml-2 h-4 w-4" /></Button>
             </motion.div>
           </div>
           <EvidenceFlow reducedMotion={reducedMotion} />
