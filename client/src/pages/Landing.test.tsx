@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import "@testing-library/jest-dom/vitest";
 import React from "react";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -13,7 +13,7 @@ const scrollIntoView = vi.hoisted(() => vi.fn());
 vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => auth }));
 vi.mock("wouter", () => ({ useLocation: () => ["/", route.setLocation] }));
 
-import Landing, { getLandingMotionPlan } from "./Landing";
+import Landing, { getLandingMotionPlan, getLandingNavigationState } from "./Landing";
 
 beforeEach(() => {
   vi.stubGlobal("IntersectionObserver", class {
@@ -50,6 +50,17 @@ describe("ClinicOCR landing page", () => {
     expect(reduced.heroSignal.animate).toEqual({});
     expect(reduced.aboutEvidence.animate).toEqual({});
     expect(reduced.signInRings.animate).toEqual({});
+  });
+
+  it("compacts the navigation into its glass state after scrolling beyond the Hero threshold", () => {
+    render(<Landing />);
+    const navigation = screen.getByTestId("landing-navigation");
+    expect(getLandingNavigationState(28)).toBe("expanded");
+    expect(navigation).toHaveAttribute("data-navigation-state", "expanded");
+    Object.defineProperty(window, "scrollY", { configurable: true, value: 56 });
+    fireEvent.scroll(window);
+    expect(getLandingNavigationState(56)).toBe("compact");
+    expect(navigation).toHaveAttribute("data-navigation-state", "compact");
   });
 
   it("opens Clerk from each visible sign-in call to action instead of only scrolling to the sign-in section", async () => {

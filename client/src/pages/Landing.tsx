@@ -13,7 +13,7 @@ import {
   Sparkles,
   Stethoscope,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 
 const entranceEase = [0.22, 1, 0.36, 1] as const;
@@ -56,15 +56,19 @@ export function getLandingMotionPlan(reducedMotion: boolean | null) {
   };
 }
 
-function Brand() {
+export function getLandingNavigationState(scrollY: number) {
+  return scrollY > 28 ? "compact" : "expanded";
+}
+
+function Brand({ compact = false }: { compact?: boolean }) {
   return (
-    <div className="flex items-center gap-3 text-white">
-      <div className="flex h-10 w-10 items-center justify-center rounded-[15px] bg-white text-xl font-bold text-teal-800 shadow-[0_10px_32px_rgba(0,0,0,0.18)]">
+    <div className={`flex items-center text-white transition-all duration-300 ${compact ? "gap-2" : "gap-3"}`}>
+      <div className={`flex items-center justify-center rounded-[15px] bg-white font-bold text-teal-800 shadow-[0_10px_32px_rgba(0,0,0,0.18)] transition-all duration-300 ${compact ? "h-8 w-8 text-base" : "h-10 w-10 text-xl"}`}>
         +
       </div>
       <div className="leading-none">
-        <p className="font-display text-xl font-bold tracking-[-0.06em]">ClinicOCR</p>
-        <p className="mt-1 text-[0.61rem] font-bold uppercase tracking-[0.18em] text-teal-200">Prescription intelligence</p>
+        <p className={`font-display font-bold tracking-[-0.06em] transition-all duration-300 ${compact ? "text-base" : "text-xl"}`}>ClinicOCR</p>
+        <p className={`mt-1 font-bold uppercase tracking-[0.18em] text-teal-200 transition-all duration-300 ${compact ? "hidden" : "text-[0.61rem]"}`}>Prescription intelligence</p>
       </div>
     </div>
   );
@@ -245,10 +249,19 @@ export default function Landing() {
   const reducedMotion = useReducedMotion();
   const still = reducedMotion === true;
   const preserveLandingPreview = import.meta.env.DEV && new URLSearchParams(window.location.search).has("preview");
+  const [navigationState, setNavigationState] = useState(() => getLandingNavigationState(typeof window === "undefined" ? 0 : window.scrollY));
+  const compactNavigation = navigationState === "compact";
 
   useEffect(() => {
     if (user && !preserveLandingPreview) setLocation("/workspace");
   }, [preserveLandingPreview, setLocation, user]);
+
+  useEffect(() => {
+    const updateNavigation = () => setNavigationState(getLandingNavigationState(window.scrollY));
+    updateNavigation();
+    window.addEventListener("scroll", updateNavigation, { passive: true });
+    return () => window.removeEventListener("scroll", updateNavigation);
+  }, []);
 
   const enterWorkspace = () => {
     if (user) {
@@ -270,10 +283,10 @@ export default function Landing() {
       <section id="hero" className="relative isolate min-h-screen overflow-hidden">
         <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_14%_12%,rgba(49,170,164,0.3),transparent_31%),radial-gradient(circle_at_87%_42%,rgba(118,219,206,0.16),transparent_26%),linear-gradient(150deg,#062c36_0%,#073c48_50%,#052b35_100%)]" />
         <div className="pointer-events-none absolute inset-x-0 top-[22%] -z-10 h-px bg-gradient-to-r from-transparent via-teal-200/20 to-transparent" />
-        <nav className="relative mx-auto flex max-w-7xl items-center justify-between px-5 py-6 lg:px-8">
-          <Brand />
-          <div className="hidden items-center gap-5 text-sm font-semibold text-teal-50/75 md:flex"><button onClick={() => scrollTo("hero")}>Hero</button><button onClick={() => scrollTo("about")}>About</button><button onClick={() => scrollTo("signin")}>Sign in</button></div>
-          <Button onClick={() => scrollTo("signin")} variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white hover:text-teal-950">{loading ? "Checking session" : user ? "Open workspace" : "Sign in"}<ArrowRight className="ml-2 h-4 w-4" /></Button>
+        <nav data-testid="landing-navigation" data-navigation-state={navigationState} className={`fixed left-1/2 z-30 flex w-[calc(100%-2.5rem)] -translate-x-1/2 items-center justify-between transition-[top,max-width,padding,background-color,border-color,box-shadow,backdrop-filter] duration-300 ${compactNavigation ? "top-3 max-w-5xl rounded-2xl border border-white/18 bg-[#073b46]/72 px-4 py-3 shadow-[0_16px_42px_rgba(2,20,28,0.3)] backdrop-blur-xl md:w-[calc(100%-4rem)]" : "top-0 max-w-7xl px-0 py-6 md:w-[calc(100%-4rem)]"}`}>
+          <Brand compact={compactNavigation} />
+          <div className="hidden items-center gap-5 text-sm font-semibold text-teal-50/75 md:flex"><button className="transition-colors hover:text-white" onClick={() => scrollTo("hero")}>Home</button><button className="transition-colors hover:text-white" onClick={() => scrollTo("about")}>About</button><button className="transition-colors hover:text-white" onClick={() => scrollTo("signin")}>Sign in</button></div>
+          <Button onClick={() => scrollTo("signin")} variant="outline" className={`border-white/20 text-white transition-all duration-300 hover:bg-white hover:text-teal-950 ${compactNavigation ? "h-9 rounded-xl bg-white/12 px-3 text-xs" : "bg-white/10"}`}>{loading ? "Checking session" : user ? "Open workspace" : "Sign in"}<ArrowRight className="ml-2 h-4 w-4" /></Button>
         </nav>
 
         <div className="relative mx-auto max-w-7xl px-5 pb-24 pt-14 lg:px-8 lg:pb-28 lg:pt-16">

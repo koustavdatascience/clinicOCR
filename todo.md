@@ -117,3 +117,5 @@
 - [ ] Diagnose the production `clinic.prescriptions.analyze` 504 response, including serverless execution duration, OCR and Gemini timeout behavior, and the client’s non-JSON error path.
 - [ ] Repair production prescription analysis so timeout failures return a structured actionable response and do not display a malformed JSON parsing error.
 - [ ] Revalidate the deployed upload-to-analysis-to-review workflow with a clinician-provided prescription image without saving or altering clinical records unless the doctor explicitly approves it.
+- [x] Rename the public landing navigation labels to Home, About, and Sign in while preserving the existing section navigation and Clerk handoff.
+- [x] Add a scroll-responsive landing navigation that compacts and gains a translucent glass surface after the visitor scrolls beyond the Hero’s initial position.
