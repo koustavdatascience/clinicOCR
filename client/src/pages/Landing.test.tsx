@@ -42,13 +42,11 @@ describe("ClinicOCR landing page", () => {
     expect(active.heroScan.transition.repeat).toBe(Infinity);
     expect(active.heroPulse.transition.repeat).toBe(Infinity);
     expect(active.heroSignal.transition.repeat).toBe(Infinity);
-    expect(active.aboutEvidence.transition.repeat).toBe(Infinity);
     expect(active.signInRings.transition.repeat).toBe(Infinity);
     expect(reduced.mode).toBe("reduced");
     expect(reduced.heroScan.animate).toEqual({});
     expect(reduced.heroPulse.animate).toEqual({});
     expect(reduced.heroSignal.animate).toEqual({});
-    expect(reduced.aboutEvidence.animate).toEqual({});
     expect(reduced.signInRings.animate).toEqual({});
   });
 
@@ -72,10 +70,12 @@ describe("ClinicOCR landing page", () => {
     expect(screen.getByRole("button", { name: "Workflow" })).toBeInTheDocument();
     expect(screen.getByTestId("hero-staged-copy")).toBeInTheDocument();
     expect(screen.getByTestId("hero-signal-trace")).toBeInTheDocument();
-    expect(screen.getByTestId("about-evidence-flow")).toBeInTheDocument();
+    const workflowCard = screen.getByTestId("about-evidence-flow");
+    expect(workflowCard).toHaveAttribute("data-evidence-position", "fixed");
     expect(screen.getByTestId("signin-session-rings")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /review the draft/i }));
     await waitFor(() => expect(screen.getByText("Structured text · medicines · notes")).toBeInTheDocument());
+    expect(workflowCard).toHaveAttribute("data-active-step", "02");
     await user.click(screen.getByRole("button", { name: /enter clinicocr/i }));
     expect(login).toHaveBeenCalledTimes(1);
     expect(scrollIntoView).not.toHaveBeenCalled();
@@ -100,10 +100,12 @@ describe("ClinicOCR landing page", () => {
     setTop(review, 280);
     fireEvent.scroll(window);
     await waitFor(() => expect(screen.getByText("Structured text · medicines · notes")).toBeInTheDocument());
+    expect(screen.getByTestId("about-evidence-flow")).toHaveAttribute("data-active-step", "02");
 
     setTop(approve, 280);
     fireEvent.scroll(window);
     await waitFor(() => expect(screen.getByText("Ready to save")).toBeInTheDocument());
+    expect(screen.getByTestId("about-evidence-flow")).toHaveAttribute("data-active-step", "03");
   });
 
   it("hands an authenticated clinician into the dashboard workspace", async () => {

@@ -24,7 +24,6 @@ export function getLandingMotionPlan(reducedMotion: boolean | null) {
       heroScan: { animate: {}, transition: { duration: 0 } },
       heroPulse: { animate: {}, transition: { duration: 0 } },
       heroSignal: { animate: {}, transition: { duration: 0 } },
-      aboutEvidence: { animate: {}, transition: { duration: 0 } },
       signInRings: { animate: {}, transition: { duration: 0 } },
     };
   }
@@ -42,10 +41,6 @@ export function getLandingMotionPlan(reducedMotion: boolean | null) {
     heroSignal: {
       animate: { x: ["-115%", "125%"] },
       transition: { duration: 2.8, repeat: Infinity, repeatDelay: 0.8, ease: "easeInOut" as const },
-    },
-    aboutEvidence: {
-      animate: { y: [0, -12, 0] },
-      transition: { duration: 3.2, repeat: Infinity, ease: "easeInOut" as const },
     },
     signInRings: {
       animate: { scale: [0.9, 1.18, 0.9], opacity: [0.2, 0.65, 0.2] },
@@ -186,7 +181,6 @@ function EvidenceFlow({ reducedMotion }: { reducedMotion: boolean | null }) {
 }
 
 function About({ reducedMotion }: { reducedMotion: boolean | null }) {
-  const plan = getLandingMotionPlan(reducedMotion);
   const still = reducedMotion === true;
   const [activeStep, setActiveStep] = useState(0);
   const workflowStepRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -228,7 +222,7 @@ function About({ reducedMotion }: { reducedMotion: boolean | null }) {
         </motion.div>
 
         <div className="mt-16 grid gap-12 lg:grid-cols-[0.93fr_1.07fr] lg:gap-20">
-          <motion.div data-testid="about-evidence-flow" animate={plan.aboutEvidence.animate} transition={plan.aboutEvidence.transition} className="lg:sticky lg:top-28 lg:self-start">
+          <div data-testid="about-evidence-flow" data-evidence-position="fixed" data-active-step={active.id} className="lg:sticky lg:top-28 lg:self-start">
             <div className="mx-auto flex max-w-[460px] items-start gap-7">
               <div className="relative flex aspect-square w-full max-w-[390px] items-center justify-center overflow-hidden rounded-[2.4rem] border border-teal-200 bg-white p-8 shadow-[0_24px_55px_rgba(13,92,89,0.1)]">
                 <div className="absolute -left-12 -top-12 h-36 w-36 rounded-full bg-teal-100/80 blur-2xl" />
@@ -247,7 +241,7 @@ function About({ reducedMotion }: { reducedMotion: boolean | null }) {
                 {steps.map((step, index) => <motion.div key={step.id} layout transition={{ duration: still ? 0 : 0.45, ease: entranceEase }} className={activeStep === index ? "h-16 w-3 rounded-full bg-teal-500 shadow-[0_0_18px_rgba(20,184,166,0.35)]" : "h-3 w-3 rounded-full bg-teal-950/15"} />)}
               </div>
             </div>
-          </motion.div>
+          </div>
 
           <div className="relative space-y-10 lg:space-y-28 lg:pb-[24vh] lg:pt-5">
             <div aria-hidden className="absolute bottom-8 left-5 top-10 hidden w-px bg-teal-100 lg:block" />
