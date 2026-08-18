@@ -34,3 +34,9 @@
 - [x] Add search-workflow UI coverage for saved-record filters and result navigation.
 - [x] Verify authenticated ClinicOCR routes at desktop and tablet sizes, including loading, empty, and not-found states.
 - [x] Add a unified upload-to-analysis-to-review-to-save workflow test with history, metadata, and PDF-export assertions.
+- [x] Pass the original prescription image and raw OCR evidence together to Gemini for multimodal structured extraction.
+- [x] Preserve the existing raw OCR output verbatim while identifying image-assisted AI draft content separately for doctor review.
+- [x] Add integration coverage using a handwritten prescription image to validate image-aware Gemini extraction and fallback behavior.
+- [x] Add an automated image-fixture integration test for multimodal Gemini structured extraction.
+- [x] Add automated multimodal Gemini fallback coverage for primary-model 429 or 503 failures.
+- [x] Handle transient network and per-model timeout failures by continuing the multimodal Gemini Flash fallback sequence.

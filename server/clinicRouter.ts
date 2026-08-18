@@ -102,7 +102,7 @@ export const clinicRouter = router({
           upload.buffer,
           upload.mimeType,
         );
-        const analysis = await analyzePrescriptionImage(upload.buffer);
+        const analysis = await analyzePrescriptionImage(upload.buffer, upload.mimeType);
         return {
           patientId: input.patientId,
           originalFilename,

@@ -54,7 +54,7 @@ const GEMINI_RESPONSE_SCHEMA = {
   additionalProperties: false,
 } as const;
 
-const EXTRACTION_INSTRUCTIONS = `You create a conservative, editable draft from handwritten-prescription OCR output. Return only JSON that follows the supplied schema. Never invent, infer, or normalize clinical facts that are not present in the raw OCR. Preserve unclear text. If any medicine or entity name is uncertain, prefix that name exactly with "Possibly " (including one trailing space). Do not diagnose, prescribe, or make treatment recommendations. Prefer empty fields over guesses.`;
+const EXTRACTION_INSTRUCTIONS = `You create a conservative, editable draft from a handwritten-prescription image and its raw OCR output. The original image is primary visual evidence; raw OCR is secondary evidence and may be incomplete or garbled. Read the handwriting directly from the image where possible, cross-check it against raw OCR, and return only JSON that follows the supplied schema. Never invent, infer, or normalize clinical facts that are not visually supported by the image or present in raw OCR. Preserve unclear content. If any medicine or entity name is uncertain, prefix that name exactly with "Possibly " (including one trailing space). Do not diagnose, prescribe, or make treatment recommendations. Prefer empty fields over guesses. The result is an editable doctor-review draft, never a final clinical record.`;
 
 export function decodePrescriptionUpload(dataUrl: string): DecodedUpload {
   const match = dataUrl.match(/^data:(image\/(?:jpeg|png));base64,([A-Za-z0-9+/=]+)$/);
@@ -109,40 +109,55 @@ export async function extractRawOcr(processedImage: Buffer): Promise<{ text: str
   }
 }
 
-export async function extractStructuredPrescription(rawOcr: string): Promise<StructuredPrescriptionDraft> {
+export async function extractStructuredPrescription(
+  rawOcr: string,
+  originalImage?: Buffer,
+  originalMimeType: "image/jpeg" | "image/png" = "image/jpeg",
+): Promise<StructuredPrescriptionDraft> {
   if (!ENV.geminiApiKey) throw new Error("The Gemini API key is not configured.");
+  const evidence = [
+    { text: `Raw OCR text follows. It may be incomplete or incorrect. Preserve this source separately; do not rewrite it in the output.\n\n${rawOcr}` },
+    ...(originalImage ? [{ inlineData: { mimeType: originalMimeType, data: originalImage.toString("base64") } }] : []),
+  ];
   let lastError = "Gemini extraction was unavailable.";
   for (const model of GEMINI_MODELS) {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(ENV.geminiApiKey)}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(30_000),
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: EXTRACTION_INSTRUCTIONS }] },
-          contents: [{ role: "user", parts: [{ text: `Raw OCR text follows. It may be incomplete or incorrect.\n\n${rawOcr}` }] }],
-          generationConfig: { responseMimeType: "application/json", responseJsonSchema: GEMINI_RESPONSE_SCHEMA, temperature: 0 },
-        }),
-      },
-    );
-    const payload = (await response.json()) as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>; error?: { message?: string } };
-    if (response.ok) {
-      const content = payload.candidates?.[0]?.content?.parts?.map(part => part.text ?? "").join("\n");
-      if (!content) throw new Error("Gemini returned an empty extraction response.");
-      return toStructuredDraft(JSON.parse(content));
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(ENV.geminiApiKey)}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: AbortSignal.timeout(30_000),
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: EXTRACTION_INSTRUCTIONS }] },
+            contents: [{ role: "user", parts: evidence }],
+            generationConfig: { responseMimeType: "application/json", responseJsonSchema: GEMINI_RESPONSE_SCHEMA, temperature: 0 },
+          }),
+        },
+      );
+      const payload = (await response.json()) as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>; error?: { message?: string } };
+      if (response.ok) {
+        const content = payload.candidates?.[0]?.content?.parts?.map(part => part.text ?? "").join("\n");
+        if (!content) throw new Error("Gemini returned an empty extraction response.");
+        return toStructuredDraft(JSON.parse(content));
+      }
+      lastError = payload.error?.message || `Gemini extraction failed with status ${response.status}.`;
+      if (response.status !== 429 && response.status !== 503) break;
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : "Gemini extraction request failed.";
     }
-    lastError = payload.error?.message || `Gemini extraction failed with status ${response.status}.`;
-    if (response.status !== 429 && response.status !== 503) break;
   }
   throw new Error(lastError);
 }
 
-export async function analyzePrescriptionImage(source: Buffer): Promise<PrescriptionAnalysis> {
+export async function analyzePrescriptionImage(
+  source: Buffer,
+  sourceMimeType: "image/jpeg" | "image/png" = "image/jpeg",
+): Promise<PrescriptionAnalysis> {
   const processedImage = await preprocessPrescriptionImage(source);
   const { text: rawOcr, confidence: ocrConfidence } = await extractRawOcr(processedImage);
   try {
-    const draft = await extractStructuredPrescription(rawOcr);
+    const draft = await extractStructuredPrescription(rawOcr, source, sourceMimeType);
     return { rawOcr, ocrConfidence, aiStatus: "complete", ...draft };
   } catch (error) {
     return { rawOcr, ocrConfidence, aiStatus: "unavailable", aiError: error instanceof Error ? error.message : "AI extraction was unavailable.", correctedText: "", summary: "", medicines: [], importantFindings: [], tags: [] };
