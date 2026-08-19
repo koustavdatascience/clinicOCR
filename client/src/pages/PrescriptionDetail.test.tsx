@@ -123,10 +123,27 @@ describe("PrescriptionDetail", () => {
 
   it("keeps the record page usable and reports an export failure when Unicode rendering cannot complete", async () => {
     const user = userEvent.setup();
-    vi.mocked(html2canvas).mockRejectedValueOnce(new Error("Canvas rendering failed"));
+    vi.mocked(html2canvas).mockRejectedValueOnce(new Error("Canvas rendering failed")).mockRejectedValueOnce(new Error("Canvas rendering failed"));
     render(<PrescriptionDetail />);
     await user.click(await screen.findByRole("button", { name: /Export PDF/i }));
     await waitFor(() => expect(toastError).toHaveBeenCalledWith("Could not generate the prescription PDF. Please try again."));
     expect(pdfSave).not.toHaveBeenCalled();
+  });
+
+  it("falls back to a direct text PDF when the canvas renderer is unavailable for a Latin-script record", async () => {
+    const user = userEvent.setup();
+    const originalText = record.prescription.correctedText;
+    const originalSummary = record.prescription.aiSummary;
+    const originalScript = record.prescription.sourceScript;
+    record.prescription.correctedText = "Take the listed medicines after meals.";
+    record.prescription.aiSummary = "Doctor-reviewed treatment instructions.";
+    record.prescription.sourceScript = "Latin";
+    vi.mocked(html2canvas).mockRejectedValueOnce(new Error("Foreign object rendering failed")).mockRejectedValueOnce(new Error("Canvas rendering failed"));
+    render(<PrescriptionDetail />);
+    await user.click(await screen.findByRole("button", { name: /Export PDF/i }));
+    await waitFor(() => expect(pdfSave).toHaveBeenCalledWith(expect.stringMatching(/^ClinicOCR-Taylor-Morgan-/)));
+    record.prescription.correctedText = originalText;
+    record.prescription.aiSummary = originalSummary;
+    record.prescription.sourceScript = originalScript;
   });
 });

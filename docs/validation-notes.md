@@ -65,3 +65,7 @@ The supplied production-error screenshot was reviewed in two overlapping ordered
 The repaired production deployment for commit `85c3762` is ready at `https://clinicocr-h2txgosb4-koustav5.vercel.app`. Its unauthenticated public page completed the Clerk session check and rendered the expected landing content, ready for an authenticated analysis retry.
 
 The updated public navigation was checked interactively in the landing preview. At the Hero start it remains an expanded transparent navigation with **Home**, **About**, and **Sign in** labels. After a page scroll, it contracts into a centered, bordered, translucent teal glass surface; the smaller ClinicOCR mark, navigation controls, and Sign in action remain visible and usable above the About section.
+
+The repaired production build was reopened for the final read-only workflow confirmation. The page completed its session check and presented the expected Clerk sign-in landing state; no clinical data was accessed or changed.
+
+Using the connected authenticated browser session, the saved legacy prescription at `/prescriptions/9` was opened and **Export PDF** was selected. The browser reproduced the toast `Could not generate the prescription PDF. Please try again.` without changing the prescription, its metadata, or doctor notes. This confirms the issue is isolated to client-side export rendering rather than record access or persistence.

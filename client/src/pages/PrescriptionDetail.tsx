@@ -52,6 +52,67 @@ function appendPdfSection(root: HTMLElement, title: string, text: string, direct
   root.append(section);
 }
 
+function supportsTextPdfFallback(record: ExportableRecord) {
+  const values = [
+    record.patient.name,
+    record.patient.phone || "",
+    record.prescription.correctedText,
+    record.prescription.aiSummary,
+    record.prescription.doctorNotes || "",
+    ...(record.prescription.medicines ?? []).flatMap(medicine => [medicine.name, medicine.dosage, medicine.frequency]),
+  ];
+  return values.every(value => !/[^\u0000-\u00FF]/.test(value));
+}
+
+function saveTextPdfFallback(record: ExportableRecord) {
+  const { patient, prescription } = record;
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const margin = 42;
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const printable = [
+    "ClinicOCR",
+    "Reviewed prescription report",
+    "",
+    `Patient: ${patient.name}${patient.age ? ` - ${patient.age} years` : ""}${patient.phone ? ` - ${patient.phone}` : ""}`,
+    `Prescription date: ${formatDate(prescription.createdAt)}`,
+    `Source language: ${prescription.sourceLanguageName || "Undetermined"}${prescription.sourceScript ? ` - ${prescription.sourceScript} script` : ""}`,
+    "",
+    "CORRECTED TEXT",
+    prescription.correctedText || "Not recorded",
+    "",
+    "AI SUMMARY, REVIEWED BY DOCTOR",
+    prescription.aiSummary || "Not recorded",
+    "",
+    "MEDICINES",
+    (prescription.medicines ?? []).map(medicine => [medicine.name, medicine.dosage, medicine.frequency].filter(Boolean).join(" - ")).join("\n") || "Not recorded",
+    "",
+    "DOCTOR NOTES",
+    prescription.doctorNotes || "Not recorded",
+  ].join("\n");
+  const lines = doc.splitTextToSize(printable, pageWidth - margin * 2) as string[];
+  let y = margin;
+  for (const line of lines) {
+    if (y > pageHeight - margin) {
+      doc.addPage();
+      y = margin;
+    }
+    doc.text(line, margin, y);
+    y += 16;
+  }
+  doc.save(`ClinicOCR-${patient.name.replace(/\s+/g, "-")}-${formatDate(prescription.createdAt).replace(/\s+/g, "-")}.pdf`);
+}
+
+async function renderPdfCanvas(report: HTMLElement) {
+  await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+  const options = { backgroundColor: "#ffffff", scale: 1.5, logging: false, useCORS: true } as const;
+  try {
+    return await html2canvas(report, { ...options, foreignObjectRendering: true });
+  } catch {
+    return html2canvas(report, options);
+  }
+}
+
 async function exportPdf(record: ExportableRecord) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const { prescription, patient } = record;
@@ -80,7 +141,7 @@ async function exportPdf(record: ExportableRecord) {
   appendPdfSection(report, "Doctor notes", prescription.doctorNotes || "Not recorded", direction);
   document.body.append(report);
   try {
-    const canvas = await html2canvas(report, { backgroundColor: "#ffffff", scale: 2, logging: false });
+    const canvas = await renderPdfCanvas(report);
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 40;
@@ -99,6 +160,15 @@ async function exportPdf(record: ExportableRecord) {
     doc.save(`ClinicOCR-${patient.name.replace(/\s+/g, "-")}-${formatDate(prescription.createdAt).replace(/\s+/g, "-")}.pdf`);
     toast.success("Prescription PDF exported.");
   } catch {
+    if (supportsTextPdfFallback(record)) {
+      try {
+        saveTextPdfFallback(record);
+        toast.success("Prescription PDF exported in a text-safe layout.");
+        return;
+      } catch {
+        // Fall through to the clinician-facing recovery message.
+      }
+    }
     toast.error("Could not generate the prescription PDF. Please try again.");
   } finally {
     report.remove();

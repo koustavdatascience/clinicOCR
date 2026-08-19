@@ -114,8 +114,14 @@
 - [x] Validate the updated Hero on the development preview at mobile and tablet breakpoints, confirming staged content, evidence-flow layout, and CTA readability.
 - [ ] Validate the current Vercel deployment’s Hero at mobile and tablet breakpoints, confirming staged headline visibility, evidence-flow layout, CTA readability, and no animation or auth-related client errors.
 - [ ] Record the user-deferred fresh sign-out/sign-in round-trip as a remaining optional validation step while completing all non-disruptive final checks.
-- [ ] Diagnose the production `clinic.prescriptions.analyze` 504 response, including serverless execution duration, OCR and Gemini timeout behavior, and the client’s non-JSON error path.
-- [ ] Repair production prescription analysis so timeout failures return a structured actionable response and do not display a malformed JSON parsing error.
+- [x] Diagnose the production `clinic.prescriptions.analyze` 504 response, including serverless execution duration, OCR and Gemini timeout behavior, and the client’s non-JSON error path.
+- [x] Repair production prescription analysis so timeout failures return a structured actionable response and do not display a malformed JSON parsing error.
 - [ ] Revalidate the deployed upload-to-analysis-to-review workflow with a clinician-provided prescription image without saving or altering clinical records unless the doctor explicitly approves it.
+- [ ] Confirm in the live browser that a clinician-provided image reaches the review screen and that no prescription is persisted before the explicit approval action.
+- [ ] Inspect the current production runtime logs immediately after the successful live analysis retry and record that no new timeout, Clerk, or protected-route errors occurred.
 - [x] Rename the public landing navigation labels to Home, About, and Sign in while preserving the existing section navigation and Clerk handoff.
 - [x] Add a scroll-responsive landing navigation that compacts and gains a translucent glass surface after the visitor scrolls beyond the Hero’s initial position.
+- [ ] Diagnose the saved-prescription PDF export failure and preserve the approved record without mutation during retries.
+- [ ] Repair browser PDF export for saved legacy and text-only prescription records, with actionable clinician feedback if a recoverable export issue remains.
+- [ ] Validate successful PDF generation from an existing saved prescription without editing that clinical record.
+- [ ] Use the connected browser session to validate the live authenticated dashboard, saved-record detail, and PDF export path without creating, editing, or approving clinical records.
