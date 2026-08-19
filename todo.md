@@ -129,7 +129,7 @@
 - [x] Query Vercel runtime logs or errors scoped specifically to deployment `dpl_39rzf84WoHfkP7DG9My6cMS9XH7N` after sign-in and document whether any Clerk, session, or protected-route failures occurred.
 - [x] Restore the polished clinical PDF report layout while retaining the resilient export fallback and validate it against the clinician-provided reference PDF.
 - [x] Simplify the PDF report’s reviewed-summary section heading to “Summary” only and validate the resilient export path.
-- [ ] Replace the broken legacy-image placeholder in record listings with an accessible, professional person avatar and validate the production rendering.
-- [ ] Add a compact, recognizable ClinicOCR favicon for browser tabs and validate it in the production page metadata.
-- [ ] Restyle the ClinicOCR landing hero with an editorial display typeface, a centered ResuMatch-inspired title composition, and responsive clinical brand alignment.
-- [ ] Reduce the landing hero to a concise headline, one precise supporting line, and one primary action.
+- [x] Replace the broken legacy-image placeholder in record listings with an accessible, professional person avatar and validate the production rendering.
+- [x] Add a compact, recognizable ClinicOCR favicon for browser tabs and validate it in the production page metadata.
+- [x] Restyle the ClinicOCR landing hero with an editorial display typeface, a centered ResuMatch-inspired title composition, and responsive clinical brand alignment.
+- [x] Reduce the landing hero to a concise headline, one precise supporting line, and one primary action.
