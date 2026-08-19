@@ -152,3 +152,4 @@
 - [x] Determine whether the existing Vercel project can use clinicocr.vercel.app as its public address instead of clinicocr-three.vercel.app.
 - [x] Remove the visible Manus-agent commit attribution from the GitHub repository history only after confirming the required safe rewrite details.
 - [x] Rewrite approved commit history to ClinicOCR Contributors, force-push main, and verify the updated GitHub attribution.
+- [x] List the currently assigned stable and temporary Vercel addresses for ClinicOCR.
