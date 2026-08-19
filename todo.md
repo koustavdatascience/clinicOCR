@@ -141,4 +141,4 @@
 - [x] Make the ClinicOCR workflow steps advance automatically from upload to review to approval as the visitor scrolls, while retaining optional accessible step controls.
 - [x] Compare the ClinicOCR scroll-driven workflow with the referenced Resu source and align any remaining relevant interaction details.
 - [x] Create a concise ClinicOCR README covering purpose, live URL, stack, local setup, environment variables, and Vercel deployment.
-- [ ] Keep the scroll-driven workflow card fixed in place while transitioning only its inner clinical visual/content across Upload, Review, and Approve stages.
+- [x] Keep the scroll-driven workflow card fixed in place while transitioning only its inner clinical visual/content across Upload, Review, and Approve stages.
