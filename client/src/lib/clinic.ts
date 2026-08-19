@@ -36,6 +36,18 @@ export function clearDraft() {
   sessionStorage.removeItem(DRAFT_KEY);
 }
 
+/** Formats AI draft text for review without changing raw OCR evidence or clinical content. */
+export function formatPrescriptionText(value: string) {
+  let formatted = value.replace(/\r\n?/g, "\n").replace(/\s*\|\s*/g, "\n").trim();
+  const labels = ["Date:", "Name:", "Age, Gender:", "Weight:", "Clinical Description:", "Advice:"];
+  for (const label of labels) {
+    const expression = new RegExp(`\\s*${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "gi");
+    formatted = formatted.replace(expression, match => `\n${match.trim()}`);
+  }
+  formatted = formatted.replace(/([^\n])\s+(?=(?:SYP|TAB|CAP|INJ|DROP)\b)/gi, "$1\n");
+  return formatted.replace(/^\n+|\n{3,}/g, match => match.startsWith("\n\n\n") ? "\n\n" : "").trim();
+}
+
 export function formatDate(value: Date | string | number) {
   return new Intl.DateTimeFormat("en", { day: "numeric", month: "short", year: "numeric" }).format(new Date(value));
 }

@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { ClipboardPlus, FileSearch, LayoutDashboard, LogOut, PanelLeft, ScanLine, Search, Users } from "lucide-react";
+import { ClipboardPlus, LayoutDashboard, LogOut, PanelLeft, ScanLine, Search, Users } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -196,7 +196,6 @@ function DashboardLayoutContent({
           </SidebarContent>
 
           <SidebarFooter className="p-3">
-            {!isCollapsed && <div className="mb-3 rounded-2xl bg-[linear-gradient(145deg,#edf9f7,#f5fbfa)] p-3.5"><div className="flex items-center gap-2 text-teal-800"><FileSearch className="h-4 w-4" /><span className="text-xs font-bold">Review-first records</span></div><p className="mt-1.5 text-[0.68rem] leading-4 text-slate-500">Every prescription needs doctor approval before it is saved.</p></div>}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-3 rounded-lg px-1 py-1 hover:bg-accent/50 transition-colors w-full text-left group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">

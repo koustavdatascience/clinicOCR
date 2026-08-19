@@ -6,16 +6,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { clearDraft, readDraft, type DraftMedicine, type PrescriptionDraft } from "@/lib/clinic";
+import { clearDraft, formatPrescriptionText, readDraft, type DraftMedicine, type PrescriptionDraft } from "@/lib/clinic";
 import { trpc } from "@/lib/trpc";
-import { AlertTriangle, CheckCircle2, FileText, Plus, Save, ShieldCheck, Sparkles, Trash2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ImageIcon, Plus, Save, ShieldCheck, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 
 function MedicineRow({ medicine, onChange, onDelete }: { medicine: DraftMedicine; onChange: (next: DraftMedicine) => void; onDelete: () => void }) {
   const uncertain = /^possibly\b/i.test(medicine.name);
-  return <div className={`grid gap-2 rounded-xl border p-3 sm:grid-cols-[1.2fr_1fr_1fr_auto] ${uncertain ? "border-amber-200 bg-amber-50/45" : "border-slate-200 bg-white"}`}><Input value={medicine.name} onChange={event => onChange({ ...medicine, name: event.target.value })} placeholder="Medicine name" className="h-9 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0" /><Input value={medicine.dosage} onChange={event => onChange({ ...medicine, dosage: event.target.value })} placeholder="Dosage" className="h-9 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0" /><Input value={medicine.frequency} onChange={event => onChange({ ...medicine, frequency: event.target.value })} placeholder="Frequency" className="h-9 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0" /><Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:text-rose-600" onClick={onDelete}><Trash2 className="h-4 w-4" /></Button>{uncertain && <div className="sm:col-span-4 flex items-center gap-2 px-1 text-[0.68rem] font-bold text-amber-800"><AlertTriangle className="h-3.5 w-3.5" />Uncertain medicine name — verify against the source image.</div>}</div>;
+  return (
+    <div className={`grid gap-2 rounded-xl border p-3 sm:grid-cols-[1.2fr_0.8fr_0.9fr_auto] ${uncertain ? "border-amber-200 bg-amber-50/45" : "border-slate-200 bg-white"}`}>
+      <Input value={medicine.name} onChange={event => onChange({ ...medicine, name: event.target.value })} placeholder="Medicine name" className="h-9 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0" />
+      <Input value={medicine.dosage} onChange={event => onChange({ ...medicine, dosage: event.target.value })} placeholder="Dosage" className="h-9 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0" />
+      <Input value={medicine.frequency} onChange={event => onChange({ ...medicine, frequency: event.target.value })} placeholder="Frequency" className="h-9 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0" />
+      <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:text-rose-600" onClick={onDelete} aria-label={`Remove ${medicine.name || "medicine"}`}><Trash2 className="h-4 w-4" /></Button>
+      {uncertain && <div className="sm:col-span-4 flex items-center gap-2 px-1 text-[0.68rem] font-bold text-amber-800"><AlertTriangle className="h-3.5 w-3.5" />Uncertain medicine name — verify against the source image.</div>}
+    </div>
+  );
 }
 
 export default function ReviewPrescription() {
@@ -23,10 +31,139 @@ export default function ReviewPrescription() {
   const [draft, setDraft] = useState<PrescriptionDraft | null>(null);
   const [notes, setNotes] = useState("");
   const [important, setImportant] = useState(false);
-  useEffect(() => setDraft(readDraft()), []);
-  const save = trpc.clinic.prescriptions.save.useMutation({ onSuccess: record => { clearDraft(); toast.success("Prescription saved after doctor review."); setLocation(`/prescriptions/${record?.prescription.id}`); }, onError: error => toast.error(error.message) });
-  if (!draft) return <DashboardLayout><div className="mx-auto max-w-5xl"><BackButton to="/upload" label="Upload prescription" /><EmptyState title="No draft is ready for review" description="Upload a prescription image first. ClinicOCR will never save a record until you explicitly approve it from this screen." actionLabel="Go to upload" onAction={() => setLocation("/upload")} /></div></DashboardLayout>;
-  function updateMedicine(index: number, medicine: DraftMedicine) { setDraft(current => current ? { ...current, medicines: current.medicines.map((item, itemIndex) => itemIndex === index ? medicine : item) } : current); }
-  function saveRecord() { const reviewedDraft = draft!; save.mutate({ patientId: reviewedDraft.patientId, imageKey: reviewedDraft.imageKey, imageUrl: reviewedDraft.imageUrl, originalFilename: reviewedDraft.originalFilename, originalMimeType: reviewedDraft.originalMimeType, rawOcr: reviewedDraft.rawOcr, correctedText: reviewedDraft.correctedText, aiSummary: reviewedDraft.summary, medicines: reviewedDraft.medicines, importantFindings: reviewedDraft.importantFindings, tags: reviewedDraft.tags, doctorNotes: notes || null, important, ocrConfidence: reviewedDraft.ocrConfidence }); }
-  return <DashboardLayout><div className="mx-auto max-w-7xl"><BackButton to="/upload" label="New upload" /><PageHeader eyebrow="Doctor review required" title="Review the prescription draft" description="This analysis is not saved. Verify source evidence and edit any field before you approve the record." actions={<Button variant="outline" className="border-slate-200 bg-white" onClick={() => { clearDraft(); setLocation("/upload"); }}>Discard draft</Button>} /><div className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl border border-teal-200 bg-teal-50/70 px-4 py-3 text-sm text-teal-900"><ShieldCheck className="h-4 w-4 shrink-0" /><span><strong>Review-first safeguard:</strong> nothing is persisted until you use the Save reviewed record action.</span></div><section className="mt-6 grid gap-6 xl:grid-cols-[0.85fr_1.15fr]"> <div className="space-y-6"><Card className="border-0 bg-white shadow-[0_12px_32px_rgba(15,70,70,0.06)]"><CardContent className="p-5"><div className="flex items-center justify-between"><div><p className="font-display text-lg font-bold tracking-[-0.04em] text-slate-900">Original image</p><p className="mt-1 text-xs text-slate-500">Preserved without modification</p></div><Badge className="bg-teal-50 text-teal-700 hover:bg-teal-50">Source</Badge></div><div className="mt-4 flex min-h-[320px] items-center justify-center overflow-hidden rounded-xl bg-slate-50"><img src={draft.imageUrl} alt="Original prescription upload" className="max-h-[480px] w-full object-contain" /></div></CardContent></Card><Card className="border-0 bg-slate-900 text-white shadow-[0_12px_32px_rgba(15,23,42,0.12)]"><CardContent className="p-5"><div className="flex items-center justify-between"><div><p className="font-display text-lg font-bold tracking-[-0.04em]">Raw OCR output</p><p className="mt-1 text-xs text-slate-400">Exact result from OCR — never cleaned or changed.</p></div><FileText className="h-5 w-5 text-teal-300" /></div><pre className="mt-4 max-h-[280px] overflow-auto whitespace-pre-wrap rounded-xl bg-white/7 p-4 font-mono text-xs leading-6 text-slate-200">{draft.rawOcr || "No raw text was detected. Inspect the original image and enter the reviewed record manually if appropriate."}</pre></CardContent></Card></div><div className="space-y-6"><Card className="border-0 bg-white shadow-[0_12px_32px_rgba(15,70,70,0.06)]"><CardContent className="p-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="font-display text-xl font-bold tracking-[-0.045em] text-slate-900">Editable AI draft</p><p className="mt-1 text-sm text-slate-500">Confirm information against the original image before saving.</p></div>{draft.aiStatus === "complete" ? <Badge className="gap-1 bg-teal-50 text-teal-700 hover:bg-teal-50"><Sparkles className="h-3.5 w-3.5" />AI draft available</Badge> : <Badge className="gap-1 bg-amber-50 text-amber-800 hover:bg-amber-50"><AlertTriangle className="h-3.5 w-3.5" />Manual review needed</Badge>}</div>{draft.aiError && <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">AI structuring was unavailable. Raw OCR remains available for manual completion.</div>}<div className="mt-6 grid gap-5"><div className="grid gap-2"><Label>Corrected text</Label><Textarea value={draft.correctedText} onChange={event => setDraft({ ...draft, correctedText: event.target.value })} className="min-h-[148px] resize-y rounded-xl border-slate-200 leading-6" placeholder="Review and enter corrected prescription text" /></div><div className="grid gap-2"><Label>Concise summary</Label><Textarea value={draft.summary} onChange={event => setDraft({ ...draft, summary: event.target.value })} className="min-h-[88px] resize-y rounded-xl border-slate-200 leading-6" placeholder="Doctor-reviewed summary" /></div></div></CardContent></Card><Card className="border-0 bg-white shadow-[0_12px_32px_rgba(15,70,70,0.06)]"><CardContent className="p-6"><div className="flex items-center justify-between"><div><p className="font-display text-xl font-bold tracking-[-0.045em] text-slate-900">Medicines</p><p className="mt-1 text-sm text-slate-500">Name, dosage, and frequency are all editable.</p></div><Button type="button" variant="outline" size="sm" className="border-slate-200" onClick={() => setDraft({ ...draft, medicines: [...draft.medicines, { name: "", dosage: "", frequency: "" }] })}><Plus className="mr-1.5 h-3.5 w-3.5" />Add</Button></div><div className="mt-5 space-y-2">{draft.medicines.length ? draft.medicines.map((medicine, index) => <MedicineRow key={`${index}-${medicine.name}`} medicine={medicine} onChange={next => updateMedicine(index, next)} onDelete={() => setDraft({ ...draft, medicines: draft.medicines.filter((_, itemIndex) => itemIndex !== index) })} />) : <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">No medicines were extracted. Add any verified medicine manually.</p>}</div></CardContent></Card><Card className="border-0 bg-white shadow-[0_12px_32px_rgba(15,70,70,0.06)]"><CardContent className="p-6"><div className="grid gap-5"><div><Label>Important findings</Label><div className="mt-2 flex flex-wrap gap-2">{draft.importantFindings.length ? draft.importantFindings.map(finding => <TagPill key={finding} className="bg-rose-50 text-rose-700">{finding}</TagPill>) : <span className="text-sm text-slate-400">No findings identified.</span>}</div></div><div><Label>Organization tags</Label><div className="mt-2 flex flex-wrap gap-2">{draft.tags.length ? draft.tags.map(tag => <TagPill key={tag} className="bg-teal-50 text-teal-700">{tag}</TagPill>) : <span className="text-sm text-slate-400">No tags generated.</span>}</div></div><div className="grid gap-2"><Label>Doctor notes <span className="font-normal text-slate-400">(optional)</span></Label><Textarea value={notes} onChange={event => setNotes(event.target.value)} className="min-h-[76px] rounded-xl border-slate-200" placeholder="For example: Follow up after 5 days" /></div><label className="flex cursor-pointer items-center gap-3 rounded-xl bg-amber-50/70 p-3"><input type="checkbox" checked={important} onChange={event => setImportant(event.target.checked)} className="h-4 w-4 rounded border-amber-300 text-amber-500 focus:ring-amber-400" /><span className="text-sm font-semibold text-amber-900">Mark as important record</span></label></div></CardContent></Card><Button className="h-12 w-full bg-teal-700 text-base shadow-lg shadow-teal-900/15 hover:bg-teal-800" disabled={save.isPending} onClick={saveRecord}>{save.isPending ? "Saving reviewed record…" : <><Save className="mr-2 h-4 w-4" />Save reviewed record</>}</Button></div></section></div></DashboardLayout>;
+
+  useEffect(() => {
+    const savedDraft = readDraft();
+    setDraft(savedDraft ? { ...savedDraft, correctedText: formatPrescriptionText(savedDraft.correctedText) } : null);
+  }, []);
+
+  const save = trpc.clinic.prescriptions.save.useMutation({
+    onSuccess: record => {
+      clearDraft();
+      toast.success("Prescription saved after doctor review.");
+      setLocation(`/prescriptions/${record?.prescription.id}`);
+    },
+    onError: error => toast.error(error.message),
+  });
+
+  if (!draft) {
+    return <DashboardLayout><div className="mx-auto max-w-5xl"><BackButton to="/upload" label="Upload prescription" /><EmptyState title="No draft is ready for review" description="Upload a prescription image first. ClinicOCR will never save a record until you explicitly approve it from this screen." actionLabel="Go to upload" onAction={() => setLocation("/upload")} /></div></DashboardLayout>;
+  }
+
+  const updateMedicine = (index: number, medicine: DraftMedicine) => setDraft(current => current ? { ...current, medicines: current.medicines.map((item, itemIndex) => itemIndex === index ? medicine : item) } : current);
+  const addMedicine = () => setDraft(current => current ? { ...current, medicines: [...current.medicines, { name: "", dosage: "", frequency: "" }] } : current);
+  const removeMedicine = (index: number) => setDraft(current => current ? { ...current, medicines: current.medicines.filter((_, itemIndex) => itemIndex !== index) } : current);
+  const saveRecord = () => {
+    save.mutate({
+      patientId: draft.patientId,
+      imageKey: draft.imageKey,
+      imageUrl: draft.imageUrl,
+      originalFilename: draft.originalFilename,
+      originalMimeType: draft.originalMimeType,
+      rawOcr: draft.rawOcr,
+      correctedText: draft.correctedText,
+      aiSummary: draft.summary,
+      medicines: draft.medicines,
+      importantFindings: draft.importantFindings,
+      tags: draft.tags,
+      doctorNotes: notes || null,
+      important,
+      ocrConfidence: draft.ocrConfidence,
+    });
+  };
+
+  return (
+    <DashboardLayout>
+      <div className="mx-auto max-w-[1480px]">
+        <BackButton to="/upload" label="New upload" />
+        <PageHeader
+          eyebrow="Doctor review required"
+          title="Review prescription"
+          description="Use the source image to confirm each field, then save the reviewed record when ready."
+          actions={<Button variant="outline" className="border-slate-200 bg-white" onClick={() => { clearDraft(); setLocation("/upload"); }}>Discard draft</Button>}
+        />
+
+        <div className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl border border-teal-200 bg-teal-50/70 px-4 py-3 text-sm text-teal-900">
+          <ShieldCheck className="h-4 w-4 shrink-0" />
+          <span><strong>Review-first safeguard:</strong> nothing is saved until you approve this record.</span>
+        </div>
+
+        <section className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(300px,0.78fr)_minmax(0,1.22fr)]">
+          <aside className="xl:sticky xl:top-8">
+            <Card className="overflow-hidden border-0 bg-white shadow-[0_12px_32px_rgba(15,70,70,0.06)]">
+              <CardContent className="p-0">
+                <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                  <div>
+                    <p className="font-display text-lg font-bold tracking-[-0.04em] text-slate-900">Original prescription</p>
+                    <p className="mt-1 text-xs text-slate-500">Reference this image while reviewing</p>
+                  </div>
+                  <Badge className="bg-teal-50 text-teal-700 hover:bg-teal-50">Source</Badge>
+                </div>
+                <div className="flex min-h-[400px] items-center justify-center bg-[linear-gradient(145deg,#f8fbfb,#eef7f5)] p-5">
+                  <img src={draft.imageUrl} alt="Original prescription upload" className="max-h-[620px] w-full rounded-xl object-contain shadow-[0_12px_30px_rgba(15,70,70,0.1)]" />
+                </div>
+                <div className="flex items-center gap-2 border-t border-slate-100 px-5 py-3 text-xs text-slate-500"><ImageIcon className="h-4 w-4 text-teal-700" />Original image remains unchanged.</div>
+              </CardContent>
+            </Card>
+          </aside>
+
+          <div className="min-w-0 space-y-6">
+            <Card className="border-0 bg-white shadow-[0_12px_32px_rgba(15,70,70,0.06)]">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-display text-xl font-bold tracking-[-0.045em] text-slate-900">Structured prescription draft</p>
+                    <p className="mt-1 text-sm text-slate-500">Patient details, clinical notes, and medicine instructions are separated for a clearer review.</p>
+                  </div>
+                  <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-teal-700" />
+                </div>
+                {draft.aiError && <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">AI structuring was unavailable. Complete the review manually using the original image.</div>}
+                <div className="mt-6 grid gap-5">
+                  <div className="grid gap-2">
+                    <Label>Corrected prescription text</Label>
+                    <Textarea value={draft.correctedText} onChange={event => setDraft({ ...draft, correctedText: event.target.value })} className="min-h-[245px] resize-y whitespace-pre-wrap rounded-xl border-slate-200 bg-slate-50/60 font-mono text-[0.82rem] leading-7" placeholder="Review and enter corrected prescription text" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Concise summary</Label>
+                    <Textarea value={draft.summary} onChange={event => setDraft({ ...draft, summary: event.target.value })} className="min-h-[86px] resize-y rounded-xl border-slate-200 leading-6" placeholder="Doctor-reviewed summary" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid gap-6 2xl:grid-cols-[1.16fr_0.84fr]">
+              <Card className="border-0 bg-white shadow-[0_12px_32px_rgba(15,70,70,0.06)]">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <div><p className="font-display text-xl font-bold tracking-[-0.045em] text-slate-900">Medicines</p><p className="mt-1 text-sm text-slate-500">Confirm the name, dosage, and frequency before saving.</p></div>
+                    <Button type="button" variant="outline" size="sm" className="shrink-0 border-slate-200" onClick={addMedicine}><Plus className="mr-1.5 h-3.5 w-3.5" />Add</Button>
+                  </div>
+                  <div className="mt-5 space-y-2">
+                    {draft.medicines.length ? draft.medicines.map((medicine, index) => <MedicineRow key={`${index}-${medicine.name}`} medicine={medicine} onChange={next => updateMedicine(index, next)} onDelete={() => removeMedicine(index)} />) : <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">No medicines were extracted. Add any verified medicine manually.</p>}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 bg-white shadow-[0_12px_32px_rgba(15,70,70,0.06)]">
+                <CardContent className="p-6">
+                  <p className="font-display text-xl font-bold tracking-[-0.045em] text-slate-900">Review notes</p>
+                  <p className="mt-1 text-sm text-slate-500">Record verified findings and any follow-up context.</p>
+                  <div className="mt-5 space-y-5">
+                    <div><Label>Important findings</Label><div className="mt-2 flex flex-wrap gap-2">{draft.importantFindings.length ? draft.importantFindings.map(finding => <TagPill key={finding} className="bg-rose-50 text-rose-700">{finding}</TagPill>) : <span className="text-sm text-slate-400">No findings identified.</span>}</div></div>
+                    <div><Label>Organization tags</Label><div className="mt-2 flex flex-wrap gap-2">{draft.tags.length ? draft.tags.map(tag => <TagPill key={tag} className="bg-teal-50 text-teal-700">{tag}</TagPill>) : <span className="text-sm text-slate-400">No tags generated.</span>}</div></div>
+                    <div className="grid gap-2"><Label>Doctor notes <span className="font-normal text-slate-400">(optional)</span></Label><Textarea value={notes} onChange={event => setNotes(event.target.value)} className="min-h-[98px] rounded-xl border-slate-200" placeholder="For example: Follow up after 5 days" /></div>
+                    <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-amber-100 bg-amber-50/70 p-3"><input type="checkbox" checked={important} onChange={event => setImportant(event.target.checked)} className="h-4 w-4 rounded border-amber-300 text-amber-500 focus:ring-amber-400" /><span className="text-sm font-semibold text-amber-900">Mark as important record</span></label>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="sticky bottom-4 z-10 rounded-2xl bg-white/90 p-2 shadow-[0_10px_30px_rgba(15,70,70,0.12)] backdrop-blur">
+              <Button className="h-12 w-full bg-teal-700 text-base shadow-lg shadow-teal-900/15 hover:bg-teal-800" disabled={save.isPending} onClick={saveRecord}>{save.isPending ? "Saving reviewed record…" : <><Save className="mr-2 h-4 w-4" />Save reviewed record</>}</Button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </DashboardLayout>
+  );
 }

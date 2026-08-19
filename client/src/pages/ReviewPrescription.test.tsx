@@ -23,7 +23,7 @@ const draft: PrescriptionDraft = {
   imageKey: "clinicocr/9/original.jpg",
   imageUrl: "/manus-storage/clinicocr/9/original.jpg",
   rawOcr: "RAW OCR TEXT\nLINE TWO",
-  correctedText: "Corrected prescription text",
+  correctedText: "Date: 20-09-2022 | Name: Ashvika | Age, Gender: 4 yr / F | Advice: SYP CALPOL 4 mL Q6H",
   summary: "Doctor review required",
   medicines: [{ name: "Possibly Amoxicillin", dosage: "500 mg", frequency: "twice daily" }],
   importantFindings: ["Verify handwriting"],
@@ -40,12 +40,15 @@ beforeEach(() => {
 afterEach(() => cleanup());
 
 describe("ReviewPrescription", () => {
-  it("shows the raw OCR unchanged and does not auto-save the draft", async () => {
+  it("formats the editable draft into clinical lines, hides raw OCR, and does not auto-save", async () => {
     saveDraft(draft);
     render(<ReviewPrescription />);
 
-    expect(await screen.findByText((_, element) => element?.tagName === "PRE" && element.textContent === "RAW OCR TEXT\nLINE TWO")).toBeInTheDocument();
-    expect(screen.getByText(/nothing is persisted until you use the Save reviewed record action/i)).toBeInTheDocument();
+    const correctedText = await screen.findByPlaceholderText(/Review and enter corrected prescription text/i);
+    expect(correctedText).toHaveValue("Date: 20-09-2022\nName: Ashvika\nAge, Gender: 4 yr / F\nAdvice:\nSYP CALPOL 4 mL Q6H");
+    expect(screen.queryByText(/Raw OCR output/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/AI draft available/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/nothing is saved until you approve this record/i)).toBeInTheDocument();
     expect(saveMutate).not.toHaveBeenCalled();
   });
 
@@ -54,7 +57,7 @@ describe("ReviewPrescription", () => {
     const user = userEvent.setup();
     render(<ReviewPrescription />);
 
-    await screen.findByRole("heading", { name: /Review the prescription draft/i });
+    await screen.findByRole("heading", { name: /Review prescription/i });
     await user.type(screen.getByPlaceholderText(/follow up after 5 days/i), "Recheck in one week");
     fireEvent.click(screen.getByLabelText(/Mark as important record/i));
     await user.click(screen.getByRole("button", { name: /Save reviewed record/i }));

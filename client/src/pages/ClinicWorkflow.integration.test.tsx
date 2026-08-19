@@ -96,7 +96,8 @@ describe("ClinicOCR unified review-first workflow", () => {
 
     cleanup();
     render(<ReviewPrescription />);
-    expect(await screen.findByText((_, element) => element?.tagName === "PRE" && element.textContent === "WORKFLOW RAW OCR\nUNCHANGED")).toBeInTheDocument();
+    const reviewedText = await screen.findByPlaceholderText(/Review and enter corrected prescription text/i);
+    expect((reviewedText as HTMLTextAreaElement).value).toContain("Workflow corrected text");
     await user.click(screen.getByRole("button", { name: /Save reviewed record/i }));
     await waitFor(() => expect(workflow.saveMutate).toHaveBeenCalledWith(expect.objectContaining({ rawOcr: "WORKFLOW RAW OCR\nUNCHANGED", patientId: 9 })));
 

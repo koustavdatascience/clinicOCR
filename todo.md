@@ -40,3 +40,8 @@
 - [x] Add an automated image-fixture integration test for multimodal Gemini structured extraction.
 - [x] Add automated multimodal Gemini fallback coverage for primary-model 429 or 503 failures.
 - [x] Handle transient network and per-model timeout failures by continuing the multimodal Gemini Flash fallback sequence.
+- [x] Remove the Raw OCR Output panel from the doctor review workspace while retaining raw OCR persistence in saved records.
+- [x] Present editable corrected prescription text with structured line breaks instead of a single continuous paragraph.
+- [x] Remove the AI draft availability badge from the review workspace.
+- [x] Remove the Review-first records sidebar callout from the application shell.
+- [x] Redesign the prescription review workspace into a more balanced layout with clear source, draft, medicine, and approval sections.
