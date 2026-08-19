@@ -103,3 +103,4 @@
 - [ ] Run a comprehensive post-migration system check covering TypeScript, unit and integration tests, Neon schema and persistence, Clerk client/server wiring, text-only record safeguards, main browser flows, production build, credential scanning, and deployment configuration.
 - [x] Show the preserved source image only for legacy prescriptions with an existing image reference; show the text-only panel for newly approved records without one.
 - [ ] Perform browser-based validation of the Clerk sign-in handoff, protected workspace, upload-to-review-to-save workflow, search/detail pages, and text-only record behavior; record the results.
+- [ ] Diagnose and fix the reported live Clerk sign-in action failure, including Clerk modal behavior, production browser errors, and post-sign-in routing.

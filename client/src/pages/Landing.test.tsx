@@ -48,7 +48,7 @@ describe("ClinicOCR landing page", () => {
     expect(reduced.signInRings.animate).toEqual({});
   });
 
-  it("guides visitors from the Hero to the separate Sign-in section, then starts sign-in only from its explicit action", async () => {
+  it("opens Clerk from each visible sign-in call to action instead of only scrolling to the sign-in section", async () => {
     const user = userEvent.setup();
     render(<Landing />);
     expect(screen.getByText(/About ClinicOCR/i)).toBeInTheDocument();
@@ -57,10 +57,10 @@ describe("ClinicOCR landing page", () => {
     expect(screen.getByTestId("about-evidence-flow")).toBeInTheDocument();
     expect(screen.getByTestId("signin-session-rings")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /enter clinicocr/i }));
-    expect(scrollIntoView).toHaveBeenCalled();
-    expect(login).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: /sign in to clinicocr/i }));
     expect(login).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: /sign in to clinicocr/i }));
+    expect(login).toHaveBeenCalledTimes(2);
     expect(route.setLocation).not.toHaveBeenCalled();
   });
 
