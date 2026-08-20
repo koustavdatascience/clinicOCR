@@ -133,3 +133,4 @@
 - [x] Add a compact, recognizable ClinicOCR favicon for browser tabs and validate it in the production page metadata.
 - [x] Restyle the ClinicOCR landing hero with an editorial display typeface, a centered ResuMatch-inspired title composition, and responsive clinical brand alignment.
 - [x] Reduce the landing hero to a concise headline, one precise supporting line, and one primary action.
+- [ ] Identify the exact licensed ResuMatch hero display font from the referenced source, then apply it to the ClinicOCR landing hero with an accessible fallback.
