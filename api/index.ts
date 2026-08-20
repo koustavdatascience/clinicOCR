@@ -1,5 +1,4 @@
-import { createClinicApp } from "../server/_core/app";
-
-// Vercel recognizes a default-exported Express app as a Node.js serverless function.
-// It must not call app.listen(); Vercel owns the HTTP listener.
-export default createClinicApp();
+// The Vercel build first generates this fully bundled application module from
+// api/server.entry.ts. Keeping this wrapper small ensures the function trace
+// includes the generated runtime module instead of unresolved TypeScript imports.
+export { default } from "./serverless.mjs";

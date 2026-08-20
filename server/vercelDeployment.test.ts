@@ -26,6 +26,9 @@ describe("Vercel deployment safety", () => {
     expect(ignoreRules).toContain(".vercel/");
     expect(vercelConfig.rewrites).toContainEqual({ source: "/api/:path*", destination: "/api/index" });
     expect(vercelConfig.outputDirectory).toBe("dist/public");
+    expect(vercelConfig.functions["api/index.ts"].includeFiles).toBe("api/serverless.mjs");
+    expect(readProjectFile("package.json")).toContain("scripts/build-vercel-server.mjs");
+    expect(readProjectFile("package.json")).toContain("scripts/smoke-vercel-function.mjs");
   });
 
   it("passes the filename-only repository secret scan", () => {
