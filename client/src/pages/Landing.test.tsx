@@ -84,6 +84,28 @@ describe("ClinicOCR landing page", () => {
     expect(route.setLocation).not.toHaveBeenCalled();
   });
 
+  it("advances the clinical workflow as its steps cross the reading line during scroll", async () => {
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 1000 });
+    render(<Landing />);
+    const upload = screen.getByRole("button", { name: /upload the prescription/i });
+    const review = screen.getByRole("button", { name: /review the draft/i });
+    const approve = screen.getByRole("button", { name: /approve the record/i });
+    const setTop = (element: HTMLElement, top: number) => Object.defineProperty(element, "getBoundingClientRect", { configurable: true, value: () => ({ top }) });
+
+    setTop(upload, 120);
+    setTop(review, 720);
+    setTop(approve, 1180);
+    fireEvent.scroll(window);
+
+    setTop(review, 280);
+    fireEvent.scroll(window);
+    await waitFor(() => expect(screen.getByText("Structured text · medicines · notes")).toBeInTheDocument());
+
+    setTop(approve, 280);
+    fireEvent.scroll(window);
+    await waitFor(() => expect(screen.getByText("Ready to save")).toBeInTheDocument());
+  });
+
   it("hands an authenticated clinician into the dashboard workspace", async () => {
     auth.user = { id: 1 };
     render(<Landing />);

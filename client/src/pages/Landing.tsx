@@ -11,7 +11,7 @@ import {
   Sparkles,
   Stethoscope,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 
 const entranceEase = [0.22, 1, 0.36, 1] as const;
@@ -189,6 +189,7 @@ function About({ reducedMotion }: { reducedMotion: boolean | null }) {
   const plan = getLandingMotionPlan(reducedMotion);
   const still = reducedMotion === true;
   const [activeStep, setActiveStep] = useState(0);
+  const workflowStepRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const steps = [
     { id: "01", title: "Upload the prescription", description: "Choose the patient and add the source image.", visualLabel: "Temporary source", visualText: "Rx" as const, icon: FileScan },
     { id: "02", title: "Review the draft", description: "Correct the structured text and medicines.", visualLabel: "Doctor review", visualText: "Review" as const, icon: ScanLine },
@@ -196,6 +197,28 @@ function About({ reducedMotion }: { reducedMotion: boolean | null }) {
   ];
   const active = steps[activeStep];
   const ActiveIcon = active.icon;
+
+  useEffect(() => {
+    const updateActiveStepFromScroll = () => {
+      const readingLine = window.innerHeight * 0.46;
+      let nextStep = 0;
+
+      workflowStepRefs.current.forEach((step, index) => {
+        if (step && step.getBoundingClientRect().top <= readingLine) nextStep = index;
+      });
+
+      setActiveStep(currentStep => currentStep === nextStep ? currentStep : nextStep);
+    };
+
+    updateActiveStepFromScroll();
+    window.addEventListener("scroll", updateActiveStepFromScroll, { passive: true });
+    window.addEventListener("resize", updateActiveStepFromScroll);
+    return () => {
+      window.removeEventListener("scroll", updateActiveStepFromScroll);
+      window.removeEventListener("resize", updateActiveStepFromScroll);
+    };
+  }, []);
+
   return (
     <section id="about" className="relative overflow-hidden bg-[#f7fbf9] px-5 py-24 text-slate-900 lg:px-8 lg:py-32">
       <div className="mx-auto max-w-6xl">
@@ -221,12 +244,12 @@ function About({ reducedMotion }: { reducedMotion: boolean | null }) {
             </div>
           </motion.div>
 
-          <div className="relative space-y-8 lg:space-y-16 lg:pt-5">
+          <div className="relative space-y-10 lg:space-y-28 lg:pb-[24vh] lg:pt-5">
             <div aria-hidden className="absolute bottom-8 left-5 top-10 hidden w-px bg-teal-100 lg:block" />
             {steps.map((step, index) => {
               const Icon = step.icon;
               const isActive = activeStep === index;
-              return <button key={step.id} type="button" onClick={() => setActiveStep(index)} onMouseEnter={() => setActiveStep(index)} onFocus={() => setActiveStep(index)} className={`relative z-10 block w-full rounded-[1.7rem] p-4 text-left transition-all duration-300 sm:p-6 ${isActive ? "bg-white shadow-[0_16px_42px_rgba(13,92,89,0.08)]" : "opacity-35 hover:opacity-70 focus:opacity-100"}`}>
+              return <button ref={element => { workflowStepRefs.current[index] = element; }} key={step.id} type="button" aria-pressed={isActive} onClick={() => setActiveStep(index)} onMouseEnter={() => setActiveStep(index)} onFocus={() => setActiveStep(index)} className={`relative z-10 block min-h-36 w-full rounded-[1.7rem] p-4 text-left transition-all duration-300 sm:p-6 ${isActive ? "bg-white shadow-[0_16px_42px_rgba(13,92,89,0.08)]" : "opacity-35 hover:opacity-70 focus:opacity-100"}`}>
                 <div className="flex items-start gap-5"><span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-all duration-300 ${isActive ? "bg-teal-100 text-teal-900 shadow-sm" : "border border-slate-200 bg-white text-slate-400"}`}>{step.id}</span><div className="pt-1"><div className="flex items-center gap-2"><Icon className={`h-4 w-4 ${isActive ? "text-teal-700" : "text-slate-400"}`} /><h3 className={`text-2xl font-bold tracking-[-0.045em] sm:text-3xl ${isActive ? "text-slate-950" : "text-slate-500"}`}>{step.title}</h3></div><p className={`mt-3 max-w-sm text-sm leading-6 sm:text-base ${isActive ? "text-slate-600" : "text-slate-400"}`}>{step.description}</p></div></div>
               </button>;
             })}
