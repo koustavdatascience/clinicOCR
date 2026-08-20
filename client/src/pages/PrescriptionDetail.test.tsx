@@ -42,9 +42,10 @@ beforeEach(() => updateMutate.mockReset());
 afterEach(() => cleanup());
 
 describe("PrescriptionDetail", () => {
-  it("shows the preserved raw OCR and flags uncertain medicine names", async () => {
+  it("hides raw OCR while retaining the reviewed record and uncertainty indicators", async () => {
     render(<PrescriptionDetail />);
-    expect(await screen.findByText((_, element) => element?.tagName === "PRE" && element.textContent === "RAW OCR TEXT\nLINE TWO")).toBeInTheDocument();
+    expect(await screen.findByText(/Reviewed content/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Raw OCR output/i)).not.toBeInTheDocument();
     expect(screen.getByText("Possibly Amoxicillin")).toBeInTheDocument();
     expect(screen.getByText("verify")).toBeInTheDocument();
   });

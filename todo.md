@@ -45,3 +45,4 @@
 - [x] Remove the AI draft availability badge from the review workspace.
 - [x] Remove the Review-first records sidebar callout from the application shell.
 - [x] Redesign the prescription review workspace into a more balanced layout with clear source, draft, medicine, and approval sections.
+- [x] Remove the Raw OCR Output panel from the saved prescription detail view while retaining raw OCR data in the record.
