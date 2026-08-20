@@ -159,3 +159,7 @@ The refactor passed TypeScript, all 47 tests across 17 test files, the Vercel pr
 After explicit confirmation, the complete `main` history was rewritten locally with **ClinicOCR Contributors** as both author and committer, using the connected GitHub account's noreply identity. A local recovery branch was created before the rewrite, and `main` was force-pushed with lease protection. GitHub confirmed the new latest commit as `bb2afd6`, attributed to **ClinicOCR Contributors** and linked to `koustavdatascience`, rather than `manus-agent`. The Vercel deployment triggered by the rewritten main branch, `dpl_HQQBhkKFcPeCqYefHEkkjdp5RUr1`, reached READY, and the ClinicOCR landing page loaded successfully from the existing stable alias.
 
 The requested `https://clinicocr.vercel.app` hostname cannot be assigned to this project because it is already active for a different ClinicOCR deployment. The current project's simple available Vercel alias remains `https://clinicocr-three.vercel.app`; the `three` suffix is part of the existing Vercel domain assignment rather than the ClinicOCR application name.
+
+## ClinicOCR public alias
+
+The requested `clinic-ocr-app.vercel.app` alias was available and was added to the Vercel project’s Production environment. Vercel reported a valid configuration, and the public ClinicOCR landing page loaded successfully from `https://clinic-ocr-app.vercel.app`. This is now the preferred shareable Vercel address; the prior `clinicocr-three.vercel.app` alias remains active as an additional stable address.

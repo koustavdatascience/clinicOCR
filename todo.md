@@ -153,3 +153,4 @@
 - [x] Remove the visible Manus-agent commit attribution from the GitHub repository history only after confirming the required safe rewrite details.
 - [x] Rewrite approved commit history to ClinicOCR Contributors, force-push main, and verify the updated GitHub attribution.
 - [x] List the currently assigned stable and temporary Vercel addresses for ClinicOCR.
+- [x] Check and assign clinic-ocr-app.vercel.app as the stable public alias, if Vercel makes it available for this project.
