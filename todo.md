@@ -142,3 +142,4 @@
 - [x] Compare the ClinicOCR scroll-driven workflow with the referenced Resu source and align any remaining relevant interaction details.
 - [x] Create a concise ClinicOCR README covering purpose, live URL, stack, local setup, environment variables, and Vercel deployment.
 - [x] Keep the scroll-driven workflow card fixed in place while transitioning only its inner clinical visual/content across Upload, Review, and Approve stages.
+- [ ] Recompose the desktop workflow to match the Resu-style fixed left visual and adjacent progress rail, with only the right-hand stage content advancing on scroll.
