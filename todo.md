@@ -103,11 +103,11 @@
 - [x] Run a comprehensive post-migration system check covering TypeScript, unit and integration tests, Neon schema and persistence, Clerk client/server wiring, text-only record safeguards, main browser flows, production build, credential scanning, and deployment configuration.
 - [x] Show the preserved source image only for legacy prescriptions with an existing image reference; show the text-only panel for newly approved records without one.
 - [ ] Perform browser-based validation of the Clerk sign-in handoff, protected workspace, upload-to-review-to-save workflow, search/detail pages, and text-only record behavior; record the results.
-- [ ] Diagnose and fix the reported live Clerk sign-in action failure, including Clerk modal behavior, production browser errors, and post-sign-in routing.
+- [x] Diagnose and fix the reported live Clerk sign-in action failure, including Clerk modal behavior, production browser errors, and post-sign-in routing.
 - [x] Complete a live authenticated Clerk sign-in, verify the `/workspace` handoff and protected-route access, and record the result without editing clinical data.
-- [ ] Inspect browser and production runtime logs after a live Clerk sign-in to confirm there are no Clerk, session, or protected-route errors.
+- [x] Inspect browser and production runtime logs after a live Clerk sign-in to confirm there are no Clerk, session, or protected-route errors.
 - [x] Fix the post-sign-in Clerk session recognition path so an authenticated clinician is routed from the landing page to `/workspace` rather than returned to the public page.
-- [ ] Re-test the live public-landing sign-in CTA through automatic `/workspace` redirect without editing clinical data.
+- [x] Re-test the live public-landing sign-in CTA through automatic `/workspace` redirect without editing clinical data.
 - [ ] Inspect browser console or network errors and the latest-production-only runtime logs for Clerk, session, and protected-route failures after the completed sign-in handoff.
 - [x] Review the supplied resu reference and adapt its Hero-page animation language to ClinicOCR without copying unrelated branding or weakening reduced-motion accessibility.
 - [x] Implement a ClinicOCR-specific, reference-inspired Hero motion system with responsive visual verification and reduced-motion coverage.
@@ -121,7 +121,9 @@
 - [ ] Inspect the current production runtime logs immediately after the successful live analysis retry and record that no new timeout, Clerk, or protected-route errors occurred.
 - [x] Rename the public landing navigation labels to Home, About, and Sign in while preserving the existing section navigation and Clerk handoff.
 - [x] Add a scroll-responsive landing navigation that compacts and gains a translucent glass surface after the visitor scrolls beyond the Hero’s initial position.
-- [ ] Diagnose the saved-prescription PDF export failure and preserve the approved record without mutation during retries.
-- [ ] Repair browser PDF export for saved legacy and text-only prescription records, with actionable clinician feedback if a recoverable export issue remains.
-- [ ] Validate successful PDF generation from an existing saved prescription without editing that clinical record.
-- [ ] Use the connected browser session to validate the live authenticated dashboard, saved-record detail, and PDF export path without creating, editing, or approving clinical records.
+- [x] Diagnose the saved-prescription PDF export failure and preserve the approved record without mutation during retries.
+- [x] Repair browser PDF export for saved legacy and text-only prescription records, with actionable clinician feedback if a recoverable export issue remains.
+- [x] Validate successful PDF generation from an existing saved prescription without editing that clinical record.
+- [x] Use the connected browser session to validate the live authenticated dashboard, saved-record detail, and PDF export path without creating, editing, or approving clinical records.
+- [ ] Inspect browser console and network activity immediately after a completed Clerk sign-in on the live deployment; record any Clerk, session, or protected-route errors or confirm none.
+- [x] Query Vercel runtime logs or errors scoped specifically to deployment `dpl_39rzf84WoHfkP7DG9My6cMS9XH7N` after sign-in and document whether any Clerk, session, or protected-route failures occurred.
