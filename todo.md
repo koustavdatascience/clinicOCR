@@ -87,7 +87,7 @@
 - [x] Confirm the new repository contains no credential-bearing tracked files before using it for Vercel linkage.
 - [x] Add the user-confirmed `GEMINI_API_KEY` and `NEON_DATABASE_URL` to the Vercel ClinicOCR project for Preview and Production without exposing their values in source control.
 - [x] Verify those two encrypted Vercel variables are present without revealing any secret contents.
-- [ ] Add the remaining Vercel variables: `JWT_SECRET`, `OAUTH_SERVER_URL`, `OWNER_OPEN_ID`, external S3 settings, `VITE_APP_ID`, and `VITE_OAUTH_PORTAL_URL`.
+- [x] Supersede the remaining Manus-era Vercel variables (`JWT_SECRET`, `OAUTH_SERVER_URL`, `OWNER_OPEN_ID`, external S3 settings, `VITE_APP_ID`, and `VITE_OAUTH_PORTAL_URL`) because Clerk and text-only records replaced those dependencies.
 - [x] Select Clerk for independent authentication; external image storage is no longer required because approved prescriptions will retain text only.
 - [x] Replace Manus OAuth login and session handling with independently managed authentication while preserving existing clinician records.
 - [x] Supersede original-image migration: new reviewed prescriptions will not persist uploaded images after doctor approval.
@@ -113,7 +113,7 @@
 - [x] Implement a ClinicOCR-specific, reference-inspired Hero motion system with responsive visual verification and reduced-motion coverage.
 - [x] Validate the updated Hero on the development preview at mobile and tablet breakpoints, confirming staged content, evidence-flow layout, and CTA readability.
 - [ ] Validate the current Vercel deployment’s Hero at mobile and tablet breakpoints, confirming staged headline visibility, evidence-flow layout, CTA readability, and no animation or auth-related client errors.
-- [ ] Record the user-deferred fresh sign-out/sign-in round-trip as a remaining optional validation step while completing all non-disruptive final checks.
+- [x] Record the user-deferred fresh sign-out/sign-in round-trip as a remaining optional validation step while completing all non-disruptive final checks.
 - [x] Diagnose the production `clinic.prescriptions.analyze` 504 response, including serverless execution duration, OCR and Gemini timeout behavior, and the client’s non-JSON error path.
 - [x] Repair production prescription analysis so timeout failures return a structured actionable response and do not display a malformed JSON parsing error.
 - [ ] Revalidate the deployed upload-to-analysis-to-review workflow with a clinician-provided prescription image without saving or altering clinical records unless the doctor explicitly approves it.
