@@ -2,7 +2,7 @@
 
 ClinicOCR turns handwritten prescriptions into clear, clinician-reviewed digital records.
 
-**Live app:** [clinicocr-three.vercel.app](https://clinicocr-three.vercel.app)
+**Live app:** [https://clinic-ocr-app.vercel.app/)
 
 ## What it does
 
