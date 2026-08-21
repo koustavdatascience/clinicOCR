@@ -104,6 +104,12 @@ The current public landing release (`https://clinicocr-f1qr3yk0u-koustav5.vercel
 
 The stable production alias, `https://clinicocr-git-main-koustav5.vercel.app`, was then opened in the connected browser and resolved to the same completed landing release. It exposes the centered **Home · About · Workflow** navigation, the single right-side **Sign in** action, the **Language aware** badge, and the three-step clinical workflow section.
 
+The scroll-driven workflow release (`https://clinicocr-coghk7w2o-koustav5.vercel.app`, deployment `dpl_BGUoCB6tYp5bWwWGTUbeoM2r9vx8`) is READY. Its initial live state shows the expected **Upload the prescription** step and the temporary-source visual before the scroll-progression check.
+
+During the production scroll check, the sticky source panel remained paired with the first upload step when the workflow heading entered view. Continuing down reached the lower **Approve the record** stage and the end of the enlarged workflow scroll area immediately before the secure-sign-in section. The active panel content is being verified separately from the rendered DOM because the lower sticky panel moves out of view at the section boundary.
+
+The rendered DOM confirmed the lower scroll position advanced the visual panel to **Text-only record / Approved / Ready to save** without a step click. Scrolling back to the upper workflow position returned the panel to **Temporary source / Rx**, after its short transition completed. The companion regression test drives the same threshold logic through upload, review, and approval states. This verifies scroll-synchronized active-state progression while retaining click, hover, focus, and `aria-pressed` controls as optional accessible alternatives.
+
 ## Exact ResuMatch hero display font
 
 The referenced ResuMatch source declares `Instrument Serif` as a local hero font in `frontend/src/lib/fonts.ts`. Its upstream project licenses the family under the SIL Open Font License 1.1. ClinicOCR now loads the exact **Instrument Serif** family from Google Fonts and uses it only through the `.font-editorial` hero class, with Georgia as an accessible fallback; the clinical workspace continues to use its existing readable sans-serif type. Production deployment `dpl_BFiAsWdZmjrH86o49MB5byNrsisa` (`https://clinicocr-eb3sknllz-koustav5.vercel.app`) is READY. A live browser capture confirms the condensed high-contrast Instrument Serif headline is rendered for **“Prescriptions, made clear.”**
