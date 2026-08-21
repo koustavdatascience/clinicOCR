@@ -78,8 +78,8 @@ describe("ClinicOCR landing page", () => {
     expect(screen.getByTestId("workflow-scroll-region")).toHaveAttribute("data-workflow-layout", "sticky-two-column");
     expect(screen.getByTestId("workflow-scroll-region")).toHaveClass("lg:flex-row");
     const stageList = screen.getByTestId("workflow-stage-list");
-    expect(stageList).toHaveClass("lg:w-1/2");
-    expect(stageList).toHaveAttribute("data-sticky-release", "approval");
+    expect(stageList).toHaveClass("lg:w-1/2", "lg:pb-[50vh]");
+    expect(stageList).toHaveAttribute("data-sticky-release", "approval-after-reading");
     expect(stageList).not.toHaveClass("lg:pb-[75vh]");
     expect(screen.getByTestId("signin-session-rings")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /review the draft/i }));

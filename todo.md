@@ -144,3 +144,4 @@
 - [x] Keep the scroll-driven workflow card fixed in place while transitioning only its inner clinical visual/content across Upload, Review, and Approve stages.
 - [x] Recompose the desktop workflow to match the Resu-style fixed left visual and adjacent progress rail, with only the right-hand stage content advancing on scroll.
 - [x] Release the desktop workflow’s fixed visual as the Approve stage is reached so the page resumes normal scrolling into the sign-in section.
+- [ ] Delay the desktop workflow release so the visual remains fixed through Review and releases only when Approve reaches the reading position.
