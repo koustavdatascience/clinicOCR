@@ -29,6 +29,8 @@ describe("Vercel deployment safety", () => {
     expect(vercelConfig.functions["api/index.ts"].includeFiles).toBe("api/serverless.mjs");
     expect(readProjectFile("package.json")).toContain("scripts/build-vercel-server.mjs");
     expect(readProjectFile("package.json")).toContain("scripts/smoke-vercel-function.mjs");
+    expect(readProjectFile("server/_core/env.ts")).toContain("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY");
+    expect(readProjectFile("server/_core/app.ts")).toContain("publishableKey: ENV.clerkPublishableKey");
   });
 
   it("passes the filename-only repository secret scan", () => {

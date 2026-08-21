@@ -13,7 +13,9 @@ export function createClinicApp() {
   const app = express();
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
-  if (ENV.clerkSecretKey) app.use(clerkMiddleware());
+  if (ENV.clerkSecretKey) {
+    app.use(clerkMiddleware({ publishableKey: ENV.clerkPublishableKey || undefined }));
+  }
   app.use(
     "/api/trpc",
     createExpressMiddleware({
