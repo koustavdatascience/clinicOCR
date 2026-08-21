@@ -190,7 +190,6 @@ function About({ reducedMotion }: { reducedMotion: boolean | null }) {
     { id: "03", title: "Approve the record", description: "Save only the clinician-approved text.", visualLabel: "Text-only record", visualText: "Approved" as const, icon: ShieldCheck },
   ];
   const active = steps[activeStep];
-  const ActiveIcon = active.icon;
 
   useEffect(() => {
     const updateActiveStepFromScroll = () => {
@@ -226,16 +225,18 @@ function About({ reducedMotion }: { reducedMotion: boolean | null }) {
             <div className="mx-auto flex w-fit items-start gap-7 lg:mx-0">
               <div className="relative flex h-[250px] w-[250px] items-center justify-center overflow-hidden rounded-[2rem] border border-teal-200 bg-white p-6 shadow-[0_18px_44px_rgba(13,92,89,0.08)] sm:h-[320px] sm:w-[320px] sm:rounded-[2.5rem] sm:p-8 lg:h-[360px] lg:w-[360px] lg:rounded-[2.75rem] lg:p-10">
                 <div className="absolute -left-12 -top-12 h-36 w-36 rounded-full bg-teal-100/80 blur-2xl" />
-                <AnimatePresence mode="wait">
-                  <motion.div key={active.id} initial={{ opacity: 0, scale: still ? 1 : 0.94, y: still ? 0 : 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.98, y: still ? 0 : -8 }} transition={{ duration: still ? 0 : 0.38, ease: entranceEase }} className="relative flex w-full flex-col items-center text-center">
-                    <div className={`flex h-20 w-20 items-center justify-center rounded-[1.6rem] sm:h-24 sm:w-24 sm:rounded-[1.8rem] ${activeStep === 0 ? "bg-amber-50 text-amber-700" : activeStep === 1 ? "bg-teal-50 text-teal-700" : "bg-slate-950 text-teal-300"}`}><ActiveIcon className="h-9 w-9 sm:h-10 sm:w-10" /></div>
-                    <p className="mt-6 text-[0.62rem] font-bold uppercase tracking-[0.16em] text-teal-700">{active.visualLabel}</p>
-                    <p className={`mt-2 font-editorial text-4xl leading-none sm:text-5xl ${activeStep === 2 ? "text-slate-950" : "text-slate-800"}`}>{active.visualText}</p>
-                    {activeStep === 0 && <p className="mt-5 rounded-xl bg-[#fff9ee] px-4 py-2 font-editorial text-lg text-slate-700 sm:text-xl">দিনে ২ বার</p>}
-                    {activeStep === 1 && <div className="mt-5 w-full rounded-2xl border border-teal-100 bg-teal-50/70 p-3 text-left text-xs font-semibold leading-5 text-teal-900">Structured text · medicines · notes</div>}
-                    {activeStep === 2 && <div className="mt-5 flex items-center gap-2 rounded-full bg-teal-50 px-4 py-2 text-xs font-bold text-teal-800"><CheckCircle2 className="h-4 w-4" />Ready to save</div>}
-                  </motion.div>
-                </AnimatePresence>
+                {steps.map((step, index) => {
+                  const VisualIcon = step.icon;
+                  const isVisualActive = activeStep === index;
+                  return <div key={step.id} data-testid={`workflow-visual-${step.id}`} data-visual-state={isVisualActive ? "active" : "inactive"} aria-hidden={!isVisualActive} className={`absolute inset-0 flex flex-col items-center justify-center px-6 text-center transition-[opacity,transform] duration-500 ${isVisualActive ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"}`}>
+                    <div className={`flex h-20 w-20 items-center justify-center rounded-[1.6rem] sm:h-24 sm:w-24 sm:rounded-[1.8rem] ${index === 0 ? "bg-amber-50 text-amber-700" : index === 1 ? "bg-teal-50 text-teal-700" : "bg-slate-950 text-teal-300"}`}><VisualIcon className="h-9 w-9 sm:h-10 sm:w-10" /></div>
+                    <p className="mt-6 text-[0.62rem] font-bold uppercase tracking-[0.16em] text-teal-700">{step.visualLabel}</p>
+                    <p className={`mt-2 font-editorial text-4xl leading-none sm:text-5xl ${index === 2 ? "text-slate-950" : "text-slate-800"}`}>{step.visualText}</p>
+                    {index === 0 && <p className="mt-5 rounded-xl bg-[#fff9ee] px-4 py-2 font-editorial text-lg text-slate-700 sm:text-xl">দিনে ২ বার</p>}
+                    {index === 1 && <div className="mt-5 w-full rounded-2xl border border-teal-100 bg-teal-50/70 p-3 text-left text-xs font-semibold leading-5 text-teal-900">Structured text · medicines · notes</div>}
+                    {index === 2 && <div className="mt-5 flex items-center gap-2 rounded-full bg-teal-50 px-4 py-2 text-xs font-bold text-teal-800"><CheckCircle2 className="h-4 w-4" />Ready to save</div>}
+                  </div>;
+                })}
               </div>
               <div aria-label="Workflow progress" className="hidden flex-col items-center gap-2 pt-12 lg:flex">
                 {steps.map((step, index) => <motion.div key={step.id} layout transition={{ duration: still ? 0 : 0.6, ease: entranceEase }} className={activeStep === index ? "h-20 w-3 rounded-full bg-teal-400 shadow-[0_0_18px_rgba(45,212,191,0.42)]" : "h-3 w-3 rounded-full bg-slate-300"} />)}

@@ -78,6 +78,8 @@ describe("ClinicOCR landing page", () => {
     await user.click(screen.getByRole("button", { name: /review the draft/i }));
     await waitFor(() => expect(screen.getByText("Structured text · medicines · notes")).toBeInTheDocument());
     expect(workflowCard).toHaveAttribute("data-active-step", "02");
+    expect(screen.getByTestId("workflow-visual-02")).toHaveAttribute("data-visual-state", "active");
+    expect(screen.getByTestId("workflow-visual-03")).toHaveAttribute("data-visual-state", "inactive");
     await user.click(screen.getByRole("button", { name: /enter clinicocr/i }));
     expect(login).toHaveBeenCalledTimes(1);
     expect(scrollIntoView).not.toHaveBeenCalled();
@@ -108,6 +110,7 @@ describe("ClinicOCR landing page", () => {
     fireEvent.scroll(window);
     await waitFor(() => expect(screen.getByText("Ready to save")).toBeInTheDocument());
     expect(screen.getByTestId("about-evidence-flow")).toHaveAttribute("data-active-step", "03");
+    expect(screen.getByTestId("workflow-visual-03")).toHaveAttribute("data-visual-state", "active");
   });
 
   it("hands an authenticated clinician into the dashboard workspace", async () => {
