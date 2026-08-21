@@ -27,6 +27,7 @@ export type SessionPayload = {
 const EXCHANGE_TOKEN_PATH = `/webdev.v1.WebDevAuthPublicService/ExchangeToken`;
 const GET_USER_INFO_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfo`;
 const GET_USER_INFO_WITH_JWT_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfoWithJwt`;
+const ACTIVITY_REFRESH_INTERVAL_MS = 12 * 60 * 60 * 1000;
 
 class OAuthService {
   constructor(private client: ReturnType<typeof axios.create>) {
@@ -311,10 +312,12 @@ class SDKServer {
       throw ForbiddenError("User not found");
     }
 
-    await db.upsertUser({
-      openId: user.openId,
-      lastSignedIn: signedInAt,
-    });
+    if (signedInAt.getTime() - user.lastSignedIn.getTime() >= ACTIVITY_REFRESH_INTERVAL_MS) {
+      await db.upsertUser({
+        openId: user.openId,
+        lastSignedIn: signedInAt,
+      });
+    }
 
     return user;
   }

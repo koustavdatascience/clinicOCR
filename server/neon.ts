@@ -12,10 +12,21 @@ export function getNeonPool() {
     pool = new Pool({
       connectionString: ENV.neonDatabaseUrl,
       max: 4,
-      idleTimeoutMillis: 20_000,
+      min: 1,
+      idleTimeoutMillis: 300_000,
       connectionTimeoutMillis: 10_000,
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10_000,
     });
   }
 
   return pool;
+}
+
+export async function warmNeonConnection() {
+  try {
+    await getNeonPool().query("SELECT 1");
+  } catch (error) {
+    console.warn("[Database] Neon warmup did not complete:", error instanceof Error ? error.message : String(error));
+  }
 }

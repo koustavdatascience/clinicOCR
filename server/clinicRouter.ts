@@ -41,7 +41,16 @@ function sanitizeFilename(value: string) {
 }
 
 export const clinicRouter = router({
-  dashboard: protectedProcedure.query(({ ctx }) => getDashboard(ctx.user.id)),
+  dashboard: protectedProcedure.query(async ({ ctx }) => {
+    const startedAt = performance.now();
+    const dashboard = await getDashboard(ctx.user.id);
+    if (typeof ctx.res.getHeader === "function" && typeof ctx.res.setHeader === "function") {
+      const current = ctx.res.getHeader("Server-Timing");
+      const prefix = typeof current === "string" && current.length ? `${current}, ` : "";
+      ctx.res.setHeader("Server-Timing", `${prefix}dashboard;dur=${(performance.now() - startedAt).toFixed(1)}`);
+    }
+    return dashboard;
+  }),
   patients: router({
     list: protectedProcedure
       .input(z.object({ query: z.string().optional() }).optional())

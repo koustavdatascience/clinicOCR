@@ -85,21 +85,24 @@ function mapPrescription(row: Row) {
 }
 
 export async function getDashboard(ownerId: number) {
-  const [counts] = await query<{ patient_count: string; prescription_count: string }>(
-    `SELECT
-      (SELECT COUNT(*) FROM clinic_patients WHERE owner_id = $1) AS patient_count,
-      (SELECT COUNT(*) FROM clinic_prescriptions WHERE owner_id = $1) AS prescription_count`,
-    [ownerId],
-  );
-  const recent = await query<Row>(
-    `SELECT p.id, p.patient_id, patient.name AS patient_name, p.image_url, p.tags, p.important, p.created_at
-     FROM clinic_prescriptions p
-     INNER JOIN clinic_patients patient ON patient.id = p.patient_id
-     WHERE p.owner_id = $1
-     ORDER BY p.created_at DESC
-     LIMIT 6`,
-    [ownerId],
-  );
+  const [countRows, recent] = await Promise.all([
+    query<{ patient_count: string; prescription_count: string }>(
+      `SELECT
+        (SELECT COUNT(*) FROM clinic_patients WHERE owner_id = $1) AS patient_count,
+        (SELECT COUNT(*) FROM clinic_prescriptions WHERE owner_id = $1) AS prescription_count`,
+      [ownerId],
+    ),
+    query<Row>(
+      `SELECT p.id, p.patient_id, patient.name AS patient_name, p.image_url, p.tags, p.important, p.created_at
+       FROM clinic_prescriptions p
+       INNER JOIN clinic_patients patient ON patient.id = p.patient_id
+       WHERE p.owner_id = $1
+       ORDER BY p.created_at DESC
+       LIMIT 6`,
+      [ownerId],
+    ),
+  ]);
+  const [counts] = countRows;
   return {
     patientCount: Number(counts?.patient_count ?? 0),
     prescriptionCount: Number(counts?.prescription_count ?? 0),

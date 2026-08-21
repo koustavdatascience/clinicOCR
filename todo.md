@@ -46,3 +46,10 @@
 - [x] Remove the Review-first records sidebar callout from the application shell.
 - [x] Redesign the prescription review workspace into a more balanced layout with clear source, draft, medicine, and approval sections.
 - [x] Remove the Raw OCR Output panel from the saved prescription detail view while retaining raw OCR data in the record.
+- [x] Diagnose and reduce the slow ClinicOCR webpage load time, including authentication and initial data requests.
+- [x] Avoid updating the user’s sign-in timestamp on every authenticated request while preserving periodic activity tracking.
+- [x] Warm the Neon database connection during server startup to reduce first-page cold request latency.
+- [x] Profile an authenticated page-load timeline; confirm from the single route, single `useAuth`, single dashboard query, and no `StrictMode` bootstrap that ClinicOCR does not intentionally issue duplicate dashboard batches.
+- [x] Add lightweight server timing instrumentation for auth context creation and dashboard data retrieval.
+- [x] Re-validate fresh-session and repeat-navigation dashboard loading after the performance changes.
+- [x] Isolate duplicate dashboard batches with development-only page-instance tracing: each controlled page instance issued one authenticated dashboard batch, and the temporary diagnostic header was removed.
