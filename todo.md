@@ -53,3 +53,15 @@
 - [x] Add lightweight server timing instrumentation for auth context creation and dashboard data retrieval.
 - [x] Re-validate fresh-session and repeat-navigation dashboard loading after the performance changes.
 - [x] Isolate duplicate dashboard batches with development-only page-instance tracing: each controlled page instance issued one authenticated dashboard batch, and the temporary diagnostic header was removed.
+- [x] Detect the prescription’s primary script and language during multimodal extraction while preserving all source-language clinical content.
+- [x] Persist detected language metadata with reviewed prescriptions without changing legacy record behavior.
+- [x] Present source-language context clearly in the doctor review and saved-record experiences without translating or auto-saving content.
+- [x] Export PDF reports using a Unicode-capable source-language layout with browser and system-font fallbacks for non-Latin scripts.
+- [x] Add multilingual extraction, persistence, and PDF-export coverage; validate existing English prescription workflows remain unchanged.
+- [x] Add error feedback for multilingual PDF generation failures and cover the failure path in tests.
+- [x] Validate the Unicode PDF export path with a Bengali reviewed-record test, browser-check the export control, and verify no client rendering error after download.
+- [x] Add a deterministic PDF-render assertion that verifies non-Latin source text and language metadata are passed to the browser renderer before export.
+- [x] Create a public ClinicOCR landing page with a creative visual system informed by Animate UI and Inspira UI design patterns.
+- [x] Route unauthenticated visitors to the landing page and authenticated clinicians to the protected dashboard without weakening access controls.
+- [x] Add responsive motion, interactive visual storytelling, and clear sign-in calls to action while respecting reduced-motion preferences.
+- [x] Add landing-page route and sign-in-flow tests, then perform desktop and mobile visual QA.

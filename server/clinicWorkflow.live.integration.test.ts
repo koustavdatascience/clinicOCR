@@ -31,6 +31,9 @@ describe("ClinicOCR live Neon workflow", () => {
       originalFilename: "verification.jpg",
       originalMimeType: "image/jpeg",
       rawOcr: "VERIFICATION RAW OCR\nUNCHANGED",
+      sourceLanguageCode: "hi",
+      sourceLanguageName: "Hindi",
+      sourceScript: "Devanagari",
       correctedText: "Verification reviewed text",
       aiSummary: "Verification summary",
       medicines: [{ name: "Possibly Verification Medicine", dosage: "500 mg", frequency: "daily" }],
@@ -42,6 +45,9 @@ describe("ClinicOCR live Neon workflow", () => {
     });
 
     expect(saved?.prescription.rawOcr).toBe("VERIFICATION RAW OCR\nUNCHANGED");
+    expect(saved?.prescription.sourceLanguageCode).toBe("hi");
+    expect(saved?.prescription.sourceLanguageName).toBe("Hindi");
+    expect(saved?.prescription.sourceScript).toBe("Devanagari");
     const prescriptionId = saved!.prescription.id;
 
     const history = await caller.prescriptions.forPatient({ patientId: patient!.id });

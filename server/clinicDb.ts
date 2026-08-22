@@ -15,6 +15,9 @@ export type PrescriptionInput = {
   originalFilename: string;
   originalMimeType: string;
   rawOcr: string;
+  sourceLanguageCode?: string | null;
+  sourceLanguageName?: string | null;
+  sourceScript?: string | null;
   correctedText: string;
   aiSummary: string;
   medicines: Medicine[];
@@ -71,6 +74,9 @@ function mapPrescription(row: Row) {
     originalFilename: String(row.original_filename),
     originalMimeType: String(row.original_mime_type),
     rawOcr: String(row.raw_ocr),
+    sourceLanguageCode: row.source_language_code === null || row.source_language_code === undefined ? null : String(row.source_language_code),
+    sourceLanguageName: row.source_language_name === null || row.source_language_name === undefined ? null : String(row.source_language_name),
+    sourceScript: row.source_script === null || row.source_script === undefined ? null : String(row.source_script),
     correctedText: String(row.corrected_text),
     aiSummary: String(row.ai_summary),
     medicines: asArray<Medicine>(row.medicines),
@@ -233,15 +239,16 @@ export async function createPrescription(ownerId: number, input: PrescriptionInp
   const [row] = await query<Row>(
     `INSERT INTO clinic_prescriptions (
       owner_id, patient_id, image_key, image_url, original_filename, original_mime_type,
-      raw_ocr, corrected_text, ai_summary, medicines, important_findings, tags,
+      raw_ocr, source_language_code, source_language_name, source_script,
+      corrected_text, ai_summary, medicines, important_findings, tags,
       doctor_notes, important, ocr_confidence
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb, $12::jsonb, $13, $14, $15)
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::jsonb, $14::jsonb, $15::jsonb, $16, $17, $18)
     RETURNING id`,
     [
       ownerId, input.patientId, input.imageKey, input.imageUrl, input.originalFilename, input.originalMimeType,
-      input.rawOcr, input.correctedText, input.aiSummary, JSON.stringify(input.medicines),
-      JSON.stringify(input.importantFindings), JSON.stringify(input.tags), input.doctorNotes ?? null,
-      input.important ?? false, input.ocrConfidence ?? null,
+      input.rawOcr, input.sourceLanguageCode ?? null, input.sourceLanguageName ?? null, input.sourceScript ?? null,
+      input.correctedText, input.aiSummary, JSON.stringify(input.medicines), JSON.stringify(input.importantFindings),
+      JSON.stringify(input.tags), input.doctorNotes ?? null, input.important ?? false, input.ocrConfidence ?? null,
     ],
   );
   return row ? getPrescription(ownerId, Number(row.id)) : null;

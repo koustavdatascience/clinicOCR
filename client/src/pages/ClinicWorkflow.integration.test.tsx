@@ -23,8 +23,17 @@ vi.mock("wouter", () => ({
 vi.mock("jspdf", () => ({
   jsPDF: class {
     setFillColor = vi.fn(); rect = vi.fn(); setTextColor = vi.fn(); setFont = vi.fn(); setFontSize = vi.fn(); text = vi.fn();
-    splitTextToSize = (text: string) => [text]; save = workflow.pdfSave;
+    splitTextToSize = (text: string) => [text]; save = workflow.pdfSave; addPage = vi.fn(); addImage = vi.fn();
+    internal = { pageSize: { getWidth: () => 595, getHeight: () => 842 } };
   },
+}));
+vi.mock("html2canvas", () => ({
+  default: vi.fn(async () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 720;
+    canvas.height = 900;
+    return canvas;
+  }),
 }));
 vi.mock("@/lib/trpc", () => ({
   trpc: {
@@ -44,7 +53,7 @@ vi.mock("@/lib/trpc", () => ({
             workflow.analyzeMutate(input);
             sessionStorage.setItem("clinicocr-review-draft", JSON.stringify({
               patientId: input.patientId, originalFilename: input.filename, originalMimeType: "image/jpeg", imageKey: "workflow/original.jpg", imageUrl: "/workflow/original.jpg",
-              rawOcr: "WORKFLOW RAW OCR\nUNCHANGED", correctedText: "Workflow corrected text", summary: "Workflow review summary",
+              rawOcr: "WORKFLOW RAW OCR\nUNCHANGED", sourceLanguageCode: "bn", sourceLanguageName: "Bengali", sourceScript: "Bengali", correctedText: "ওয়ার্কফ্লো সংশোধিত লেখা", summary: "ওয়ার্কফ্লো পর্যালোচনা সারাংশ",
               medicines: [{ name: "Possibly Workflow Medicine", dosage: "500 mg", frequency: "daily" }], importantFindings: [], tags: ["Workflow"], ocrConfidence: 74, aiStatus: "complete",
             }));
           },
@@ -55,7 +64,7 @@ vi.mock("@/lib/trpc", () => ({
             workflow.saveMutate(input);
             workflow.record = {
               patient: workflow.patient,
-              prescription: { id: 12, ownerId: 1, patientId: input.patientId, imageKey: input.imageKey, imageUrl: input.imageUrl, originalFilename: input.originalFilename, originalMimeType: input.originalMimeType, rawOcr: input.rawOcr, correctedText: input.correctedText, aiSummary: input.aiSummary, medicines: input.medicines, importantFindings: input.importantFindings, tags: input.tags, doctorNotes: input.doctorNotes, important: input.important, ocrConfidence: input.ocrConfidence, createdAt: new Date("2026-08-21"), updatedAt: new Date("2026-08-21") },
+              prescription: { id: 12, ownerId: 1, patientId: input.patientId, imageKey: input.imageKey, imageUrl: input.imageUrl, originalFilename: input.originalFilename, originalMimeType: input.originalMimeType, rawOcr: input.rawOcr, sourceLanguageCode: input.sourceLanguageCode, sourceLanguageName: input.sourceLanguageName, sourceScript: input.sourceScript, correctedText: input.correctedText, aiSummary: input.aiSummary, medicines: input.medicines, importantFindings: input.importantFindings, tags: input.tags, doctorNotes: input.doctorNotes, important: input.important, ocrConfidence: input.ocrConfidence, createdAt: new Date("2026-08-21"), updatedAt: new Date("2026-08-21") },
             };
             options?.onSuccess(workflow.record);
           },
@@ -81,6 +90,8 @@ beforeEach(() => {
   workflow.record = null;
   workflow.setLocation.mockReset(); workflow.analyzeMutate.mockReset(); workflow.saveMutate.mockReset(); workflow.updateMutate.mockReset(); workflow.pdfSave.mockReset();
   Object.defineProperty(URL, "createObjectURL", { value: vi.fn(() => "blob:workflow"), configurable: true });
+  Object.defineProperty(HTMLCanvasElement.prototype, "getContext", { configurable: true, value: () => ({ drawImage: vi.fn() }) });
+  Object.defineProperty(HTMLCanvasElement.prototype, "toDataURL", { configurable: true, value: () => "data:image/png;base64,export" });
 });
 afterEach(() => cleanup());
 
@@ -97,9 +108,9 @@ describe("ClinicOCR unified review-first workflow", () => {
     cleanup();
     render(<ReviewPrescription />);
     const reviewedText = await screen.findByPlaceholderText(/Review and enter corrected prescription text/i);
-    expect((reviewedText as HTMLTextAreaElement).value).toContain("Workflow corrected text");
+    expect((reviewedText as HTMLTextAreaElement).value).toContain("ওয়ার্কফ্লো সংশোধিত লেখা");
     await user.click(screen.getByRole("button", { name: /Save reviewed record/i }));
-    await waitFor(() => expect(workflow.saveMutate).toHaveBeenCalledWith(expect.objectContaining({ rawOcr: "WORKFLOW RAW OCR\nUNCHANGED", patientId: 9 })));
+    await waitFor(() => expect(workflow.saveMutate).toHaveBeenCalledWith(expect.objectContaining({ rawOcr: "WORKFLOW RAW OCR\nUNCHANGED", patientId: 9, sourceLanguageCode: "bn", sourceLanguageName: "Bengali", sourceScript: "Bengali" })));
 
     cleanup();
     render(<PatientDetail />);
@@ -114,6 +125,6 @@ describe("ClinicOCR unified review-first workflow", () => {
     await user.click(screen.getByRole("button", { name: /Export PDF/i }));
     expect(workflow.updateMutate).toHaveBeenCalledWith({ id: 12, important: true });
     expect(workflow.updateMutate).toHaveBeenCalledWith({ id: 12, doctorNotes: "Workflow follow-up" });
-    expect(workflow.pdfSave).toHaveBeenCalled();
+    await waitFor(() => expect(workflow.pdfSave).toHaveBeenCalled());
   });
 });

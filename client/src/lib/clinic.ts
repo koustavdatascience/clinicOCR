@@ -7,6 +7,9 @@ export type PrescriptionDraft = {
   imageKey: string;
   imageUrl: string;
   rawOcr: string;
+  sourceLanguageCode?: string;
+  sourceLanguageName?: string;
+  sourceScript?: string;
   correctedText: string;
   summary: string;
   medicines: DraftMedicine[];

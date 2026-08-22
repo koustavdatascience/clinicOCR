@@ -4,9 +4,12 @@ import React from "react";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import html2canvas from "html2canvas";
 
+const toastMocks = vi.hoisted(() => ({ error: vi.fn(), success: vi.fn() }));
 const updateMutate = vi.fn();
 const pdfSave = vi.fn();
+const toastError = toastMocks.error;
 
 vi.mock("@/components/DashboardLayout", () => ({ default: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }));
 vi.mock("@/lib/trpc", () => ({
@@ -22,23 +25,45 @@ vi.mock("wouter", () => ({ useLocation: () => ["/prescriptions/12", vi.fn()], us
 vi.mock("jspdf", () => ({
   jsPDF: class {
     setFillColor = vi.fn(); rect = vi.fn(); setTextColor = vi.fn(); setFont = vi.fn(); setFontSize = vi.fn(); text = vi.fn();
-    splitTextToSize = (text: string) => [text]; save = pdfSave;
+    splitTextToSize = (text: string) => [text]; save = pdfSave; addPage = vi.fn(); addImage = vi.fn();
+    internal = { pageSize: { getWidth: () => 595, getHeight: () => 842 } };
   },
 }));
+vi.mock("html2canvas", () => ({
+  default: vi.fn(async () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 720;
+    canvas.height = 900;
+    return canvas;
+  }),
+}));
+vi.mock("sonner", () => ({ toast: toastMocks }));
 
 const record = {
   patient: { id: 9, name: "Taylor Morgan", age: 34, gender: "Female", phone: "5552002" },
   prescription: {
     id: 12, patientId: 9, imageKey: "image-key", imageUrl: "/original.jpg", originalFilename: "original.jpg", originalMimeType: "image/jpeg",
-    rawOcr: "RAW OCR TEXT\nLINE TWO", correctedText: "Reviewed prescription", aiSummary: "Doctor-approved summary",
+    rawOcr: "RAW OCR TEXT\nLINE TWO", correctedText: "সকালে ও রাতে ওষুধটি গ্রহণ করুন", aiSummary: "ডাক্তার-পর্যালোচিত নির্দেশনা",
     medicines: [{ name: "Possibly Amoxicillin", dosage: "500 mg", frequency: "twice daily" }], importantFindings: [], tags: ["Follow-up"],
-    doctorNotes: "Initial note", important: false, ocrConfidence: 72, createdAt: new Date("2026-08-21T00:00:00Z"), updatedAt: new Date("2026-08-21T00:00:00Z"), ownerId: 1,
+    doctorNotes: "Initial note", important: false, ocrConfidence: 72, sourceLanguageCode: "bn", sourceLanguageName: "Bengali", sourceScript: "Bengali", createdAt: new Date("2026-08-21T00:00:00Z"), updatedAt: new Date("2026-08-21T00:00:00Z"), ownerId: 1,
   },
 };
 
 import PrescriptionDetail from "./PrescriptionDetail";
 
-beforeEach(() => updateMutate.mockReset());
+beforeEach(() => {
+  updateMutate.mockReset();
+  pdfSave.mockReset();
+  toastError.mockReset();
+  vi.mocked(html2canvas).mockResolvedValue((() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 720;
+    canvas.height = 900;
+    return canvas;
+  })());
+  Object.defineProperty(HTMLCanvasElement.prototype, "getContext", { configurable: true, value: () => ({ drawImage: vi.fn() }) });
+  Object.defineProperty(HTMLCanvasElement.prototype, "toDataURL", { configurable: true, value: () => "data:image/png;base64,export" });
+});
 afterEach(() => cleanup());
 
 describe("PrescriptionDetail", () => {
@@ -48,6 +73,7 @@ describe("PrescriptionDetail", () => {
     expect(screen.queryByText(/Raw OCR output/i)).not.toBeInTheDocument();
     expect(screen.getByText("Possibly Amoxicillin")).toBeInTheDocument();
     expect(screen.getByText("verify")).toBeInTheDocument();
+    expect(screen.getByText(/Source language: Bengali/i)).toBeInTheDocument();
   });
 
   it("updates notes and importance only from explicit actions and exports a PDF on request", async () => {
@@ -63,6 +89,31 @@ describe("PrescriptionDetail", () => {
 
     await waitFor(() => expect(updateMutate).toHaveBeenNthCalledWith(1, { id: 12, important: true }));
     expect(updateMutate).toHaveBeenNthCalledWith(2, { id: 12, doctorNotes: "Review after seven days" });
-    expect(pdfSave).toHaveBeenCalledWith(expect.stringMatching(/^ClinicOCR-Taylor-Morgan-/));
+    await waitFor(() => expect(pdfSave).toHaveBeenCalledWith(expect.stringMatching(/^ClinicOCR-Taylor-Morgan-/)));
+  });
+
+  it("passes Bengali text and source-language metadata into the successful Unicode PDF renderer", async () => {
+    const user = userEvent.setup();
+    vi.mocked(html2canvas).mockImplementationOnce(async report => {
+      expect(report.lang).toBe("bn");
+      expect(report.textContent).toContain("Bengali · Bengali script");
+      expect(report.textContent).toContain("সকালে ও রাতে ওষুধটি গ্রহণ করুন");
+      const canvas = document.createElement("canvas");
+      canvas.width = 720;
+      canvas.height = 900;
+      return canvas;
+    });
+    render(<PrescriptionDetail />);
+    await user.click(await screen.findByRole("button", { name: /Export PDF/i }));
+    await waitFor(() => expect(pdfSave).toHaveBeenCalled());
+  });
+
+  it("keeps the record page usable and reports an export failure when Unicode rendering cannot complete", async () => {
+    const user = userEvent.setup();
+    vi.mocked(html2canvas).mockRejectedValueOnce(new Error("Canvas rendering failed"));
+    render(<PrescriptionDetail />);
+    await user.click(await screen.findByRole("button", { name: /Export PDF/i }));
+    await waitFor(() => expect(toastError).toHaveBeenCalledWith("Could not generate the prescription PDF. Please try again."));
+    expect(pdfSave).not.toHaveBeenCalled();
   });
 });

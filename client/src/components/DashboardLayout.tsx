@@ -30,7 +30,7 @@ import { Button } from "./ui/button";
 import { ClinicMark } from "./clinic/ClinicMark";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Overview", path: "/" },
+  { icon: LayoutDashboard, label: "Overview", path: "/workspace" },
   { icon: Users, label: "Patients", path: "/patients" },
   { icon: ScanLine, label: "Digitize", path: "/upload" },
   { icon: Search, label: "Find records", path: "/search" },

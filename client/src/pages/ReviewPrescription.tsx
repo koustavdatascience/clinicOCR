@@ -61,6 +61,9 @@ export default function ReviewPrescription() {
       originalFilename: draft.originalFilename,
       originalMimeType: draft.originalMimeType,
       rawOcr: draft.rawOcr,
+      sourceLanguageCode: draft.sourceLanguageCode || "und",
+      sourceLanguageName: draft.sourceLanguageName || "Undetermined",
+      sourceScript: draft.sourceScript || "Unknown",
       correctedText: draft.correctedText,
       aiSummary: draft.summary,
       medicines: draft.medicines,
@@ -102,7 +105,7 @@ export default function ReviewPrescription() {
                 <div className="flex min-h-[400px] items-center justify-center bg-[linear-gradient(145deg,#f8fbfb,#eef7f5)] p-5">
                   <img src={draft.imageUrl} alt="Original prescription upload" className="max-h-[620px] w-full rounded-xl object-contain shadow-[0_12px_30px_rgba(15,70,70,0.1)]" />
                 </div>
-                <div className="flex items-center gap-2 border-t border-slate-100 px-5 py-3 text-xs text-slate-500"><ImageIcon className="h-4 w-4 text-teal-700" />Original image remains unchanged.</div>
+                <div className="border-t border-slate-100 px-5 py-3 text-xs text-slate-500"><div className="flex items-center gap-2"><ImageIcon className="h-4 w-4 text-teal-700" />Original image remains unchanged.</div>{draft.sourceLanguageName && <p className="mt-2 text-teal-800"><strong>Detected source:</strong> {draft.sourceLanguageName}{draft.sourceScript ? ` · ${draft.sourceScript} script` : ""}</p>}</div>
               </CardContent>
             </Card>
           </aside>
@@ -121,11 +124,11 @@ export default function ReviewPrescription() {
                 <div className="mt-6 grid gap-5">
                   <div className="grid gap-2">
                     <Label>Corrected prescription text</Label>
-                    <Textarea value={draft.correctedText} onChange={event => setDraft({ ...draft, correctedText: event.target.value })} className="min-h-[245px] resize-y whitespace-pre-wrap rounded-xl border-slate-200 bg-slate-50/60 font-mono text-[0.82rem] leading-7" placeholder="Review and enter corrected prescription text" />
+                    <Textarea lang={draft.sourceLanguageCode || undefined} dir={draft.sourceScript === "Arabic" ? "rtl" : "auto"} value={draft.correctedText} onChange={event => setDraft({ ...draft, correctedText: event.target.value })} className="min-h-[245px] resize-y whitespace-pre-wrap rounded-xl border-slate-200 bg-slate-50/60 font-mono text-[0.82rem] leading-7" placeholder="Review and enter corrected prescription text" />
                   </div>
                   <div className="grid gap-2">
                     <Label>Concise summary</Label>
-                    <Textarea value={draft.summary} onChange={event => setDraft({ ...draft, summary: event.target.value })} className="min-h-[86px] resize-y rounded-xl border-slate-200 leading-6" placeholder="Doctor-reviewed summary" />
+                    <Textarea lang={draft.sourceLanguageCode || undefined} dir={draft.sourceScript === "Arabic" ? "rtl" : "auto"} value={draft.summary} onChange={event => setDraft({ ...draft, summary: event.target.value })} className="min-h-[86px] resize-y rounded-xl border-slate-200 leading-6" placeholder="Doctor-reviewed summary" />
                   </div>
                 </div>
               </CardContent>

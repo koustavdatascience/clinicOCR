@@ -31,6 +31,9 @@ describe("prescription extraction safeguards", () => {
 
   it("preserves structured fields while normalizing uncertain medicine names", () => {
     const draft = toStructuredDraft({
+      source_language_code: "bn",
+      source_language_name: "Bengali",
+      source_script: "Bengali",
       corrected_text: "Raw draft",
       summary: "Review required",
       medicines: [{ name: "POSSIBLY Levolin", dosage: "", frequency: "" }],
@@ -39,11 +42,14 @@ describe("prescription extraction safeguards", () => {
     });
     expect(draft.medicines[0]?.name).toBe("Possibly Levolin");
     expect(draft.correctedText).toBe("Raw draft");
+    expect(draft.sourceLanguageCode).toBe("bn");
+    expect(draft.sourceLanguageName).toBe("Bengali");
+    expect(draft.sourceScript).toBe("Bengali");
   });
 
   it("sends the original image and verbatim raw OCR as separate Gemini evidence parts", async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
-      candidates: [{ content: { parts: [{ text: JSON.stringify({ corrected_text: "Reviewed", summary: "Review", medicines: [], important_findings: [], tags: [] }) }] } }],
+      candidates: [{ content: { parts: [{ text: JSON.stringify({ source_language_code: "hi", source_language_name: "Hindi", source_script: "Devanagari", corrected_text: "Reviewed", summary: "Review", medicines: [], important_findings: [], tags: [] }) }] } }],
     }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -60,13 +66,14 @@ describe("prescription extraction safeguards", () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ error: { message: "Temporarily overloaded" } }), { status: 503 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({
-        candidates: [{ content: { parts: [{ text: JSON.stringify({ corrected_text: "Image reviewed", summary: "Fallback review", medicines: [], important_findings: [], tags: [] }) }] } }],
+        candidates: [{ content: { parts: [{ text: JSON.stringify({ source_language_code: "bn", source_language_name: "Bengali", source_script: "Bengali", corrected_text: "Image reviewed", summary: "Fallback review", medicines: [], important_findings: [], tags: [] }) }] } }],
       }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
     const draft = await extractStructuredPrescription("RAW OCR\nUNCHANGED", Buffer.from("source-image"), "image/jpeg");
 
     expect(draft.correctedText).toBe("Image reviewed");
+    expect(draft.sourceLanguageName).toBe("Bengali");
     expect(fetchMock).toHaveBeenCalledTimes(2);
     const fallbackRequest = JSON.parse(fetchMock.mock.calls[1]?.[1]?.body as string);
     expect(fallbackRequest.contents[0].parts).toEqual(expect.arrayContaining([
@@ -79,7 +86,7 @@ describe("prescription extraction safeguards", () => {
     const fetchMock = vi.fn()
       .mockRejectedValueOnce(new DOMException("The operation was aborted due to timeout", "TimeoutError"))
       .mockResolvedValueOnce(new Response(JSON.stringify({
-        candidates: [{ content: { parts: [{ text: JSON.stringify({ corrected_text: "Fallback after timeout", summary: "Review", medicines: [], important_findings: [], tags: [] }) }] } }],
+        candidates: [{ content: { parts: [{ text: JSON.stringify({ source_language_code: "ta", source_language_name: "Tamil", source_script: "Tamil", corrected_text: "Fallback after timeout", summary: "Review", medicines: [], important_findings: [], tags: [] }) }] } }],
       }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
