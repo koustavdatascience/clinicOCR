@@ -64,43 +64,112 @@ function supportsTextPdfFallback(record: ExportableRecord) {
   return values.every(value => !/[^\u0000-\u00FF]/.test(value));
 }
 
+function prescriptionPdfFilename(record: ExportableRecord) {
+  return `ClinicOCR-${record.patient.name.replace(/\s+/g, "-")}-${formatDate(record.prescription.createdAt).replace(/\s+/g, "-")}.pdf`;
+}
+
 function saveTextPdfFallback(record: ExportableRecord) {
   const { patient, prescription } = record;
   const doc = new jsPDF({ unit: "pt", format: "a4" });
-  const margin = 42;
+  const teal = [7, 98, 114] as const;
+  const ink = [24, 38, 52] as const;
+  const muted = [100, 116, 139] as const;
+  const mist = [240, 253, 250] as const;
+  const margin = 46;
   const pageHeight = doc.internal.pageSize.getHeight();
   const pageWidth = doc.internal.pageSize.getWidth();
-  const printable = [
-    "ClinicOCR",
-    "Reviewed prescription report",
-    "",
-    `Patient: ${patient.name}${patient.age ? ` - ${patient.age} years` : ""}${patient.phone ? ` - ${patient.phone}` : ""}`,
-    `Prescription date: ${formatDate(prescription.createdAt)}`,
-    `Source language: ${prescription.sourceLanguageName || "Undetermined"}${prescription.sourceScript ? ` - ${prescription.sourceScript} script` : ""}`,
-    "",
-    "CORRECTED TEXT",
-    prescription.correctedText || "Not recorded",
-    "",
-    "AI SUMMARY, REVIEWED BY DOCTOR",
-    prescription.aiSummary || "Not recorded",
-    "",
-    "MEDICINES",
-    (prescription.medicines ?? []).map(medicine => [medicine.name, medicine.dosage, medicine.frequency].filter(Boolean).join(" - ")).join("\n") || "Not recorded",
-    "",
-    "DOCTOR NOTES",
-    prescription.doctorNotes || "Not recorded",
-  ].join("\n");
-  const lines = doc.splitTextToSize(printable, pageWidth - margin * 2) as string[];
-  let y = margin;
-  for (const line of lines) {
-    if (y > pageHeight - margin) {
-      doc.addPage();
-      y = margin;
+  const contentWidth = pageWidth - margin * 2;
+  const bottom = pageHeight - 44;
+  let page = 1;
+  let y = 0;
+
+  const drawFooter = () => {
+    doc.setTextColor(...muted);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text("ClinicOCR · doctor-reviewed text record", margin, pageHeight - 25);
+    doc.text(`Page ${page}`, pageWidth - margin, pageHeight - 25, { align: "right" });
+  };
+
+  const startPage = (continued: boolean) => {
+    doc.setFillColor(...teal);
+    doc.rect(0, 0, pageWidth, continued ? 64 : 92, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(continued ? 17 : 24);
+    doc.text("ClinicOCR", margin, continued ? 34 : 42);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(continued ? 9 : 10);
+    doc.text(continued ? "Reviewed prescription report · continued" : "Reviewed prescription report", margin, continued ? 49 : 60);
+    y = continued ? 92 : 118;
+  };
+
+  const nextPage = () => {
+    drawFooter();
+    page += 1;
+    doc.addPage();
+    startPage(true);
+  };
+
+  const ensureSpace = (height: number) => {
+    if (y + height > bottom) nextPage();
+  };
+
+  const drawSection = (title: string, body: string, tint = false) => {
+    const lines = doc.splitTextToSize(body || "Not recorded", contentWidth - 28) as string[];
+    const sectionHeight = 39 + Math.max(lines.length, 1) * 14 + (tint ? 18 : 10);
+    ensureSpace(sectionHeight);
+    if (tint) {
+      doc.setFillColor(...mist);
+      doc.rect(margin, y, contentWidth, sectionHeight, "F");
     }
-    doc.text(line, margin, y);
-    y += 16;
+    doc.setFillColor(...teal);
+    doc.rect(margin, y + 4, 3, 17, "F");
+    doc.setTextColor(...teal);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.text(title.toUpperCase(), margin + 12, y + 16);
+    doc.setTextColor(...ink);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    let textY = y + 34;
+    for (const line of lines) {
+      doc.text(line, margin + 12, textY);
+      textY += 14;
+    }
+    y += sectionHeight + 14;
+  };
+
+  startPage(false);
+  doc.setFillColor(...mist);
+  doc.rect(margin, y, contentWidth, 62, "F");
+  doc.setTextColor(...muted);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.text("PATIENT", margin + 16, y + 20);
+  doc.text("PRESCRIPTION DATE", margin + contentWidth * 0.57, y + 20);
+  doc.setTextColor(...ink);
+  doc.setFontSize(11);
+  doc.text(`${patient.name}${patient.age ? ` · ${patient.age} years` : ""}`, margin + 16, y + 40);
+  doc.text(formatDate(prescription.createdAt), margin + contentWidth * 0.57, y + 40);
+  if (patient.phone) {
+    doc.setTextColor(...muted);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.text(patient.phone, margin + 16, y + 54);
   }
-  doc.save(`ClinicOCR-${patient.name.replace(/\s+/g, "-")}-${formatDate(prescription.createdAt).replace(/\s+/g, "-")}.pdf`);
+  y += 86;
+
+  drawSection("Corrected text", prescription.correctedText);
+  drawSection("AI summary · reviewed by doctor", prescription.aiSummary, true);
+  const medicineText = (prescription.medicines ?? []).map(medicine => {
+    const name = /^possibly\b/i.test(medicine.name) ? `VERIFY: ${medicine.name}` : medicine.name;
+    return [name, medicine.dosage, medicine.frequency].filter(Boolean).join("  —  ");
+  }).join("\n");
+  drawSection("Medicines", medicineText);
+  drawSection("Doctor notes", prescription.doctorNotes || "No doctor notes recorded.", true);
+  drawFooter();
+  doc.save(prescriptionPdfFilename(record));
 }
 
 async function renderPdfCanvas(report: HTMLElement) {
@@ -157,7 +226,7 @@ async function exportPdf(record: ExportableRecord) {
       slice.getContext("2d")?.drawImage(canvas, 0, offset, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
       doc.addImage(slice.toDataURL("image/png"), "PNG", margin, margin, outputWidth, (sliceHeight * outputWidth) / canvas.width);
     }
-    doc.save(`ClinicOCR-${patient.name.replace(/\s+/g, "-")}-${formatDate(prescription.createdAt).replace(/\s+/g, "-")}.pdf`);
+    doc.save(prescriptionPdfFilename(record));
     toast.success("Prescription PDF exported.");
   } catch {
     if (supportsTextPdfFallback(record)) {

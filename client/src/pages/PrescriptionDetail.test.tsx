@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import html2canvas from "html2canvas";
 
 const toastMocks = vi.hoisted(() => ({ error: vi.fn(), success: vi.fn() }));
+const pdfOperations = vi.hoisted(() => ({ text: vi.fn(), rect: vi.fn() }));
 const updateMutate = vi.fn();
 const pdfSave = vi.fn();
 const toastError = toastMocks.error;
@@ -24,7 +25,7 @@ vi.mock("@/lib/trpc", () => ({
 vi.mock("wouter", () => ({ useLocation: () => ["/prescriptions/12", vi.fn()], useRoute: () => [true, { id: "12" }] }));
 vi.mock("jspdf", () => ({
   jsPDF: class {
-    setFillColor = vi.fn(); rect = vi.fn(); setTextColor = vi.fn(); setFont = vi.fn(); setFontSize = vi.fn(); text = vi.fn();
+    setFillColor = vi.fn(); rect = pdfOperations.rect; setTextColor = vi.fn(); setFont = vi.fn(); setFontSize = vi.fn(); text = pdfOperations.text;
     splitTextToSize = (text: string) => [text]; save = pdfSave; addPage = vi.fn(); addImage = vi.fn();
     internal = { pageSize: { getWidth: () => 595, getHeight: () => 842 } };
   },
@@ -55,6 +56,8 @@ beforeEach(() => {
   record.prescription.imageUrl = "/original.jpg";
   updateMutate.mockReset();
   pdfSave.mockReset();
+  pdfOperations.text.mockReset();
+  pdfOperations.rect.mockReset();
   toastError.mockReset();
   vi.mocked(html2canvas).mockResolvedValue((() => {
     const canvas = document.createElement("canvas");
@@ -142,6 +145,10 @@ describe("PrescriptionDetail", () => {
     render(<PrescriptionDetail />);
     await user.click(await screen.findByRole("button", { name: /Export PDF/i }));
     await waitFor(() => expect(pdfSave).toHaveBeenCalledWith(expect.stringMatching(/^ClinicOCR-Taylor-Morgan-/)));
+    expect(pdfOperations.text).toHaveBeenCalledWith("ClinicOCR", expect.any(Number), expect.any(Number));
+    expect(pdfOperations.text).toHaveBeenCalledWith("CORRECTED TEXT", expect.any(Number), expect.any(Number));
+    expect(pdfOperations.text).toHaveBeenCalledWith("MEDICINES", expect.any(Number), expect.any(Number));
+    expect(pdfOperations.rect).toHaveBeenCalled();
     record.prescription.correctedText = originalText;
     record.prescription.aiSummary = originalSummary;
     record.prescription.sourceScript = originalScript;
