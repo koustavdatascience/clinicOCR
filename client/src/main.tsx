@@ -3,7 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { getClerkToken, setClerkTokenResolver } from "@/lib/clerkToken";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
@@ -17,10 +17,23 @@ const queryClient = new QueryClient({
 
 function ClerkTokenBridge({ children }: { children: ReactNode }) {
   const { getToken, isLoaded } = useClerkAuth();
+  const [bridgeReady, setBridgeReady] = useState(false);
   useEffect(() => {
-    setClerkTokenResolver(isLoaded ? () => getToken() : async () => null);
-    return () => setClerkTokenResolver(async () => null);
+    if (!isLoaded) {
+      setBridgeReady(false);
+      setClerkTokenResolver(async () => null);
+      return;
+    }
+    setClerkTokenResolver(() => getToken());
+    setBridgeReady(true);
+    return () => {
+      setBridgeReady(false);
+      setClerkTokenResolver(async () => null);
+    };
   }, [getToken, isLoaded]);
+  if (!bridgeReady) {
+    return <div className="flex min-h-screen items-center justify-center bg-[#062c36] p-6 text-center text-sm leading-6 text-teal-50/80">Establishing secure clinical session…</div>;
+  }
   return <>{children}</>;
 }
 
