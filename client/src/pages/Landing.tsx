@@ -244,7 +244,7 @@ function About({ reducedMotion }: { reducedMotion: boolean | null }) {
             </div>
           </div>
 
-          <div className="flex flex-col gap-12 pl-2 sm:pl-4 lg:gap-36 lg:pb-[30vh] lg:pl-12 xl:pl-16">
+          <div data-testid="workflow-stage-list" className="flex flex-col gap-12 pl-2 sm:pl-4 lg:gap-36 lg:pb-[75vh] lg:pl-12 xl:pl-16">
             {steps.map((step, index) => {
               const Icon = step.icon;
               const isActive = activeStep === index;

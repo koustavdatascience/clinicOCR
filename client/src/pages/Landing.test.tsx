@@ -74,6 +74,7 @@ describe("ClinicOCR landing page", () => {
     expect(workflowCard).toHaveAttribute("data-evidence-position", "fixed");
     expect(workflowCard).toHaveClass("lg:sticky", "lg:top-[15vh]", "lg:h-[60vh]");
     expect(screen.getByTestId("workflow-scroll-region")).toHaveAttribute("data-workflow-layout", "sticky-two-column");
+    expect(screen.getByTestId("workflow-stage-list")).toHaveClass("lg:pb-[75vh]");
     expect(screen.getByTestId("signin-session-rings")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /review the draft/i }));
     await waitFor(() => expect(screen.getByText("Structured text · medicines · notes")).toBeInTheDocument());
