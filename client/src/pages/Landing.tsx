@@ -229,18 +229,23 @@ function About({ reducedMotion }: { reducedMotion: boolean | null }) {
 
         <div className="mt-16 grid gap-12 lg:grid-cols-[0.93fr_1.07fr] lg:gap-20">
           <motion.div data-testid="about-evidence-flow" animate={plan.aboutEvidence.animate} transition={plan.aboutEvidence.transition} className="lg:sticky lg:top-28 lg:self-start">
-            <div className="relative mx-auto flex aspect-square w-full max-w-[390px] items-center justify-center overflow-hidden rounded-[2.4rem] border border-teal-200 bg-white p-8 shadow-[0_24px_55px_rgba(13,92,89,0.1)]">
-              <div className="absolute -left-12 -top-12 h-36 w-36 rounded-full bg-teal-100/80 blur-2xl" />
-              <AnimatePresence mode="wait">
-                <motion.div key={active.id} initial={{ opacity: 0, scale: still ? 1 : 0.94, y: still ? 0 : 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.98, y: still ? 0 : -8 }} transition={{ duration: still ? 0 : 0.38, ease: entranceEase }} className="relative flex w-full flex-col items-center text-center">
-                  <div className={`flex h-24 w-24 items-center justify-center rounded-[1.8rem] ${activeStep === 0 ? "bg-amber-50 text-amber-700" : activeStep === 1 ? "bg-teal-50 text-teal-700" : "bg-slate-950 text-teal-300"}`}><ActiveIcon className="h-10 w-10" /></div>
-                  <p className="mt-7 text-[0.66rem] font-bold uppercase tracking-[0.16em] text-teal-700">{active.visualLabel}</p>
-                  <p className={`mt-2 font-editorial text-5xl leading-none ${activeStep === 2 ? "text-slate-950" : "text-slate-800"}`}>{active.visualText}</p>
-                  {activeStep === 0 && <p className="mt-5 rounded-xl bg-[#fff9ee] px-4 py-2 font-editorial text-xl text-slate-700">দিনে ২ বার</p>}
-                  {activeStep === 1 && <div className="mt-5 w-full rounded-2xl border border-teal-100 bg-teal-50/70 p-3 text-left text-xs font-semibold leading-5 text-teal-900">Structured text · medicines · notes</div>}
-                  {activeStep === 2 && <div className="mt-5 flex items-center gap-2 rounded-full bg-teal-50 px-4 py-2 text-xs font-bold text-teal-800"><CheckCircle2 className="h-4 w-4" />Ready to save</div>}
-                </motion.div>
-              </AnimatePresence>
+            <div className="mx-auto flex max-w-[460px] items-start gap-7">
+              <div className="relative flex aspect-square w-full max-w-[390px] items-center justify-center overflow-hidden rounded-[2.4rem] border border-teal-200 bg-white p-8 shadow-[0_24px_55px_rgba(13,92,89,0.1)]">
+                <div className="absolute -left-12 -top-12 h-36 w-36 rounded-full bg-teal-100/80 blur-2xl" />
+                <AnimatePresence mode="wait">
+                  <motion.div key={active.id} initial={{ opacity: 0, scale: still ? 1 : 0.94, y: still ? 0 : 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.98, y: still ? 0 : -8 }} transition={{ duration: still ? 0 : 0.38, ease: entranceEase }} className="relative flex w-full flex-col items-center text-center">
+                    <div className={`flex h-24 w-24 items-center justify-center rounded-[1.8rem] ${activeStep === 0 ? "bg-amber-50 text-amber-700" : activeStep === 1 ? "bg-teal-50 text-teal-700" : "bg-slate-950 text-teal-300"}`}><ActiveIcon className="h-10 w-10" /></div>
+                    <p className="mt-7 text-[0.66rem] font-bold uppercase tracking-[0.16em] text-teal-700">{active.visualLabel}</p>
+                    <p className={`mt-2 font-editorial text-5xl leading-none ${activeStep === 2 ? "text-slate-950" : "text-slate-800"}`}>{active.visualText}</p>
+                    {activeStep === 0 && <p className="mt-5 rounded-xl bg-[#fff9ee] px-4 py-2 font-editorial text-xl text-slate-700">দিনে ২ বার</p>}
+                    {activeStep === 1 && <div className="mt-5 w-full rounded-2xl border border-teal-100 bg-teal-50/70 p-3 text-left text-xs font-semibold leading-5 text-teal-900">Structured text · medicines · notes</div>}
+                    {activeStep === 2 && <div className="mt-5 flex items-center gap-2 rounded-full bg-teal-50 px-4 py-2 text-xs font-bold text-teal-800"><CheckCircle2 className="h-4 w-4" />Ready to save</div>}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+              <div aria-label="Workflow progress" className="hidden flex-col items-center gap-2 pt-12 lg:flex">
+                {steps.map((step, index) => <motion.div key={step.id} layout transition={{ duration: still ? 0 : 0.45, ease: entranceEase }} className={activeStep === index ? "h-16 w-3 rounded-full bg-teal-500 shadow-[0_0_18px_rgba(20,184,166,0.35)]" : "h-3 w-3 rounded-full bg-teal-950/15"} />)}
+              </div>
             </div>
           </motion.div>
 
@@ -249,7 +254,7 @@ function About({ reducedMotion }: { reducedMotion: boolean | null }) {
             {steps.map((step, index) => {
               const Icon = step.icon;
               const isActive = activeStep === index;
-              return <button ref={element => { workflowStepRefs.current[index] = element; }} key={step.id} type="button" aria-pressed={isActive} onClick={() => setActiveStep(index)} onMouseEnter={() => setActiveStep(index)} onFocus={() => setActiveStep(index)} className={`relative z-10 block min-h-36 w-full rounded-[1.7rem] p-4 text-left transition-all duration-300 sm:p-6 ${isActive ? "bg-white shadow-[0_16px_42px_rgba(13,92,89,0.08)]" : "opacity-35 hover:opacity-70 focus:opacity-100"}`}>
+              return <button ref={element => { workflowStepRefs.current[index] = element; }} key={step.id} type="button" aria-current={isActive ? "step" : undefined} aria-pressed={isActive} onClick={() => setActiveStep(index)} onMouseEnter={() => setActiveStep(index)} onFocus={() => setActiveStep(index)} className={`relative z-10 block min-h-36 w-full origin-left rounded-[1.7rem] p-4 text-left transition-all duration-500 sm:p-6 ${isActive ? "scale-100 bg-white shadow-[0_16px_42px_rgba(13,92,89,0.08)]" : "scale-[0.95] opacity-35 hover:scale-[0.98] hover:opacity-70 focus:scale-100 focus:opacity-100"}`}>
                 <div className="flex items-start gap-5"><span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-all duration-300 ${isActive ? "bg-teal-100 text-teal-900 shadow-sm" : "border border-slate-200 bg-white text-slate-400"}`}>{step.id}</span><div className="pt-1"><div className="flex items-center gap-2"><Icon className={`h-4 w-4 ${isActive ? "text-teal-700" : "text-slate-400"}`} /><h3 className={`text-2xl font-bold tracking-[-0.045em] sm:text-3xl ${isActive ? "text-slate-950" : "text-slate-500"}`}>{step.title}</h3></div><p className={`mt-3 max-w-sm text-sm leading-6 sm:text-base ${isActive ? "text-slate-600" : "text-slate-400"}`}>{step.description}</p></div></div>
               </button>;
             })}
